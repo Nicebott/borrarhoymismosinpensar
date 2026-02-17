@@ -4,7 +4,6 @@ import { Search, Star, BookOpen, MapPin, Clock, Users, Globe } from 'lucide-reac
 import ProfessorDetailsModal from './ProfessorDetailsModal';
 import ReviewModal from './ReviewModal';
 import { supabase } from '../supabase';
-import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from './ui/Card';
 import Button from './ui/Button';

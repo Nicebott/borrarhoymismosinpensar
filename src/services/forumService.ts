@@ -97,8 +97,6 @@ export const createMessage = async (
     if (error) throw error;
 
     // Update the topic's message count
-    await supabase.rpc('increment_field', undefined).then(() => {});
-    // Simple approach: increment manually
     const { data: topicData } = await supabase
       .from('forum_topics')
       .select('mensajes_count')
