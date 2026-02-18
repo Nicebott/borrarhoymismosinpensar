@@ -17,11 +17,11 @@ const Pagination: React.FC<PaginationProps> = ({
   darkMode
 }) => {
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
+      setWindowWidth(window.innerWidth);
     };
 
     window.addEventListener('resize', handleResize);
@@ -31,10 +31,11 @@ const Pagination: React.FC<PaginationProps> = ({
   const pageNumbers = useMemo(() => {
     if (totalPages <= 1) return [];
 
+    const isMobile = windowWidth < 640;
     const delta = isMobile ? 1 : 2;
-    const range = [];
-    const rangeWithDots = [];
-    let l;
+
+    const range: number[] = [];
+    const rangeWithDots: (number | string)[] = [];
 
     range.push(1);
 
@@ -46,20 +47,25 @@ const Pagination: React.FC<PaginationProps> = ({
       range.push(totalPages);
     }
 
+    let previousPage: number | undefined;
+
     for (let i = 0; i < range.length; i++) {
-      if (l) {
-        if (range[i] - l === 2) {
-          rangeWithDots.push(l + 1);
-        } else if (range[i] - l !== 1) {
+      const currentPageNum = range[i];
+
+      if (previousPage !== undefined) {
+        if (currentPageNum - previousPage === 2) {
+          rangeWithDots.push(previousPage + 1);
+        } else if (currentPageNum - previousPage > 2) {
           rangeWithDots.push('...');
         }
       }
-      rangeWithDots.push(range[i]);
-      l = range[i];
+
+      rangeWithDots.push(currentPageNum);
+      previousPage = currentPageNum;
     }
 
     return rangeWithDots;
-  }, [currentPage, totalPages, isMobile]);
+  }, [currentPage, totalPages, windowWidth]);
 
   if (pageNumbers.length <= 1) return null;
 
@@ -68,47 +74,55 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => paginate(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`px-2 sm:px-3 py-2 rounded-md flex-shrink-0 ${
+        className={`px-2 sm:px-3 py-2 rounded-md flex-shrink-0 transition-colors ${
           darkMode
             ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 disabled:text-gray-600'
             : 'bg-white text-blue-600 hover:bg-blue-50 disabled:text-gray-400'
-        } disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
-        aria-label="Previous page"
+        } disabled:opacity-50 disabled:cursor-not-allowed`}
+        aria-label="Pagina anterior"
       >
         <ChevronLeft size={20} className="sm:w-5 sm:h-5" />
       </button>
-      
+
       <div className="flex items-center gap-1 sm:gap-2 justify-center overflow-x-auto scrollbar-hide">
-        {pageNumbers.map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' ? paginate(number) : undefined}
-            disabled={typeof number !== 'number'}
-            className={`px-3 sm:px-4 py-2 rounded-md flex-shrink-0 min-w-[40px] sm:min-w-[44px] text-sm sm:text-base font-medium ${
-              currentPage === number
-                ? darkMode
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-600 text-white'
-                : darkMode
-                  ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
-                  : 'bg-white text-blue-600 hover:bg-blue-50'
-            } ${typeof number !== 'number' ? 'cursor-default hover:bg-transparent' : 'transition-colors'}`}
-            aria-current={currentPage === number ? 'page' : undefined}
-          >
-            {number}
-          </button>
-        ))}
+        {pageNumbers.map((number, index) => {
+          const isNumber = typeof number === 'number';
+          const isActive = currentPage === number;
+
+          return (
+            <button
+              key={`${number}-${index}`}
+              onClick={() => isNumber ? paginate(number) : undefined}
+              disabled={!isNumber}
+              className={`px-2 sm:px-4 py-2 rounded-md flex-shrink-0 min-w-[40px] sm:min-w-[44px] text-sm sm:text-base font-medium ${
+                isActive
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : isNumber
+                    ? darkMode
+                      ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
+                      : 'bg-white text-blue-600 hover:bg-blue-50'
+                    : darkMode
+                      ? 'bg-transparent text-gray-500 cursor-default'
+                      : 'bg-transparent text-gray-400 cursor-default'
+              } ${isNumber ? 'transition-colors' : ''}`}
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={isNumber ? `Ir a la pagina ${number}` : undefined}
+            >
+              {number}
+            </button>
+          );
+        })}
       </div>
-      
+
       <button
         onClick={() => paginate(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`px-2 sm:px-3 py-2 rounded-md flex-shrink-0 ${
+        className={`px-2 sm:px-3 py-2 rounded-md flex-shrink-0 transition-colors ${
           darkMode
             ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 disabled:text-gray-600'
             : 'bg-white text-blue-600 hover:bg-blue-50 disabled:text-gray-400'
-        } disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
-        aria-label="Next page"
+        } disabled:opacity-50 disabled:cursor-not-allowed`}
+        aria-label="Pagina siguiente"
       >
         <ChevronRight size={20} className="sm:w-5 sm:h-5" />
       </button>
