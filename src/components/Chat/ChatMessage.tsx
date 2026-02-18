@@ -15,15 +15,17 @@ interface ChatMessageProps {
   darkMode: boolean;
   isCurrentUser: boolean;
   isAdmin: boolean;
+  currentUserIsAdmin?: boolean;
   onDelete: (messageId: string) => void;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ 
-  message, 
-  darkMode, 
+const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
+  darkMode,
   isCurrentUser,
   isAdmin,
-  onDelete
+  onDelete,
+  currentUserIsAdmin
 }) => {
   const timeAgo = formatDistanceToNow(new Date(message.timestamp), {
     addSuffix: true,
@@ -47,8 +49,19 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               : 'bg-gray-100'
         }`}
       >
-        <div className="flex items-center gap-1 md:gap-2 mb-1 flex-wrap">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between gap-2 md:gap-3 mb-1 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className={`font-medium text-xs md:text-sm ${
+              isCurrentUser
+                ? 'text-white'
+                : darkMode
+                  ? 'text-gray-300'
+                  : 'text-gray-700'
+            }`}>
+              {message.username}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
             {message.isAdmin ? (
               <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] md:text-xs font-bold ${
                 darkMode
@@ -59,28 +72,26 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 ADMIN
               </span>
             ) : (
-              <span className={`font-medium text-xs md:text-sm ${
-                isCurrentUser
-                  ? 'text-white'
-                  : darkMode
-                    ? 'text-gray-300'
-                    : 'text-gray-700'
+              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] md:text-xs font-medium ${
+                darkMode
+                  ? 'bg-blue-900/40 text-blue-300'
+                  : 'bg-blue-100 text-blue-700'
               }`}>
-                {message.username}
+                Estudiante
               </span>
             )}
+            {currentUserIsAdmin && (
+              <button
+                onClick={() => onDelete(message.id)}
+                className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+                  darkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-500 hover:text-red-500'
+                }`}
+                title="Eliminar mensaje"
+              >
+                <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
+              </button>
+            )}
           </div>
-          {isAdmin && (
-            <button
-              onClick={() => onDelete(message.id)}
-              className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
-                darkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-500 hover:text-red-500'
-              }`}
-              title="Eliminar mensaje"
-            >
-              <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
-            </button>
-          )}
         </div>
         <p className={`text-xs md:text-sm break-words ${
           isCurrentUser ? 'text-white' : darkMode ? 'text-gray-200' : 'text-gray-800'

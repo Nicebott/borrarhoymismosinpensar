@@ -27,7 +27,17 @@ const ALL_CAMPUSES = [
   'Neyba',
   'Cotui',
   'Nagua',
-  'Dajabon'
+  'Dajabon',
+  'Finca Exp Engombe',
+  'Moca',
+  'Jarabacoa',
+  'San Cristóbal',
+  'San Pedro de Macoris',
+  'Montecristi',
+  'Samaná',
+  'Elías Piña',
+  'Hermanas Mirabal',
+  'Yamasá'
 ];
 
 interface HomePageProps {

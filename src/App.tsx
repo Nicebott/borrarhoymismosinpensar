@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Chat from './components/Chat';
 import AuthModal from './components/AuthModal';
@@ -11,6 +11,8 @@ import ForumPage from './pages/ForumPage';
 import AdminPage from './pages/AdminPage';
 import VirtualPage from './pages/VirtualPage';
 import SemipresencialPage from './pages/SemipresencialPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 import { useAuth } from './hooks/useAuth';
 import { Toaster } from 'react-hot-toast';
 import { checkIsAdmin, checkIsSuperAdmin } from './services/adminService';
@@ -131,6 +133,14 @@ function App() {
               path="/admin"
               element={<AdminPage darkMode={darkMode} />}
             />
+            <Route
+              path="/terms"
+              element={<TermsPage darkMode={darkMode} />}
+            />
+            <Route
+              path="/privacy"
+              element={<PrivacyPage darkMode={darkMode} />}
+            />
           </Routes>
         </main>
 
@@ -147,13 +157,13 @@ function App() {
               </div>
               <div className="flex gap-4">
                 <FooterLink
-                  onClick={() => setShowTermsModal(true)}
+                  to="/terms"
                   darkMode={darkMode}
                 >
                   Terminos y Condiciones
                 </FooterLink>
                 <FooterLink
-                  onClick={() => setShowPrivacyModal(true)}
+                  to="/privacy"
                   darkMode={darkMode}
                 >
                   Politica de Privacidad
@@ -187,20 +197,20 @@ function App() {
 }
 
 interface FooterLinkProps {
-  onClick: () => void;
+  to: string;
   darkMode: boolean;
   children: React.ReactNode;
 }
 
-const FooterLink: React.FC<FooterLinkProps> = ({ onClick, darkMode, children }) => (
-  <button
-    onClick={onClick}
+const FooterLink: React.FC<FooterLinkProps> = ({ to, darkMode, children }) => (
+  <Link
+    to={to}
     className={`text-sm ${
       darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'
     } transition-colors`}
   >
     {children}
-  </button>
+  </Link>
 );
 
 export default App;

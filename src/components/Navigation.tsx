@@ -32,7 +32,7 @@ const Navigation: React.FC<NavigationProps> = ({
     if (path === '/') {
       return location.pathname === '/' && !location.search.includes('modality');
     }
-    return location.pathname === path || location.search.includes(path.split('?')[1] || '');
+    return location.pathname.startsWith(path);
   };
 
   const handleLinkClick = () => {
@@ -203,14 +203,14 @@ const NavLink: React.FC<NavLinkProps> = ({
   <Link
     to={to}
     onClick={onClick}
-    className={`flex items-center px-4 py-3 md:px-3 md:py-1.5 rounded-md text-sm font-medium transition-colors duration-200 w-full md:w-auto justify-start md:justify-center ${
+    className={`flex items-center px-4 py-3 md:px-4 md:py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full md:w-auto justify-start md:justify-center ${
       isActive
         ? darkMode
-          ? 'bg-gray-700 text-white border-l-4 border-blue-400 md:border-l-0'
-          : 'bg-gray-100 text-blue-800 border-l-4 border-blue-500 md:border-l-0'
+          ? 'bg-gray-700 text-white'
+          : 'bg-blue-100 text-blue-700'
         : darkMode
-          ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-700 hover:border-l-4 hover:border-blue-400 md:hover:border-l-0'
-          : 'text-gray-600 hover:text-blue-600 hover:bg-gray-100 hover:border-l-4 hover:border-blue-500 md:hover:border-l-0'
+          ? 'text-gray-300 hover:text-white'
+          : 'text-gray-600 hover:text-gray-900'
     }`}
   >
     {children}

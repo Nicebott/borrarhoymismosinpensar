@@ -27,7 +27,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
     sendMessage,
     loadMoreMessages,
     deleteMessage,
-  } = useSupabaseChat(isChatOpen, displayName, user?.id);
+  } = useSupabaseChat(isChatOpen, displayName, user?.id, isAdmin);
 
   useEffect(() => {
     const chatEntered = localStorage.getItem('chatEntered');
@@ -87,6 +87,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
   };
 
   const handleOpenAuth = () => {
+    setIsChatOpen(false);
     if (onOpenAuth) {
       onOpenAuth();
     }

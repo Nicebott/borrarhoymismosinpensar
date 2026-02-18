@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
@@ -17,11 +17,20 @@ const Pagination: React.FC<PaginationProps> = ({
   darkMode
 }) => {
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-  
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const pageNumbers = useMemo(() => {
     if (totalPages <= 1) return [];
-    
-    const isMobile = window.innerWidth < 640;
+
     const delta = isMobile ? 1 : 2;
     const range = [];
     const rangeWithDots = [];
@@ -50,7 +59,7 @@ const Pagination: React.FC<PaginationProps> = ({
     }
 
     return rangeWithDots;
-  }, [currentPage, totalPages]);
+  }, [currentPage, totalPages, isMobile]);
 
   if (pageNumbers.length <= 1) return null;
 

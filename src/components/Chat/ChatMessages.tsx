@@ -66,6 +66,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
             isCurrentUser={message.username === currentUsername}
             isAdmin={isAdmin}
             onDelete={onDeleteMessage}
+            currentUserIsAdmin={isAdmin}
           />
         ))}
       </AnimatePresence>
