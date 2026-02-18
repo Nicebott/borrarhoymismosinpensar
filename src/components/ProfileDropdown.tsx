@@ -1,5 +1,6 @@
 import React from 'react';
 import { LogOut, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 import toast from 'react-hot-toast';
 
@@ -10,6 +11,10 @@ interface ProfileDropdownProps {
 }
 
 const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ darkMode, onClose, displayName }) => {
+  const handleProfileClick = () => {
+    onClose();
+  };
+
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -31,6 +36,20 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ darkMode, onClose, di
           <User size={16} />
           <span>{displayName || 'Usuario'}</span>
         </div>
+      </div>
+      <div className="border-t border-gray-700">
+        <Link
+          to="/perfil"
+          onClick={handleProfileClick}
+          className={`flex w-full items-center gap-2 px-4 py-2 text-sm cursor-pointer ${
+            darkMode
+              ? 'text-gray-300 hover:bg-gray-700'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <User size={16} />
+          <span>Mi Perfil</span>
+        </Link>
       </div>
       <div className="border-t border-gray-700">
         <button

@@ -116,6 +116,15 @@ const Forum: React.FC<ForumProps> = ({ darkMode, setIsAuthModalOpen }) => {
     }
   };
 
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== messageId));
+  };
+
+  const handleBackFromTopic = () => {
+    setSelectedTopic(null);
+    loadTopics();
+  };
+
   if (loading) {
     return (
       <div className={`flex flex-col items-center justify-center h-64 ${
@@ -133,8 +142,9 @@ const Forum: React.FC<ForumProps> = ({ darkMode, setIsAuthModalOpen }) => {
         <TopicView
           topic={selectedTopic}
           messages={messages}
-          onBack={() => setSelectedTopic(null)}
+          onBack={handleBackFromTopic}
           onSendMessage={handleSendMessage}
+          onDeleteMessage={handleDeleteMessage}
           darkMode={darkMode}
         />
       ) : (

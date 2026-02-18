@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
@@ -7,6 +7,10 @@ interface PrivacyPageProps {
 }
 
 const PrivacyPage: React.FC<PrivacyPageProps> = ({ darkMode }) => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -23,11 +27,14 @@ const PrivacyPage: React.FC<PrivacyPageProps> = ({ darkMode }) => {
         <div className={`rounded-lg shadow-lg p-8 ${
           darkMode ? 'bg-gray-800' : 'bg-white'
         }`}>
-          <h1 className={`text-3xl md:text-4xl font-bold mb-8 ${
+          <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${
             darkMode ? 'text-white' : 'text-gray-900'
           }`}>
             Política de Privacidad
           </h1>
+          <p className={`text-sm mb-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Última actualización: 18/2/2026
+          </p>
 
           <div className={`prose prose-lg max-w-none ${
             darkMode ? 'prose-invert' : ''
@@ -35,7 +42,7 @@ const PrivacyPage: React.FC<PrivacyPageProps> = ({ darkMode }) => {
 
             <div className="mb-8">
               <p className={`text-lg mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                En la plataforma de Programación Docente UASD, tu privacidad es importante para nosotros. Esta política de privacidad explica cómo recopilamos, utilizamos, divulgamos y protegemos tu información.
+                En Nicebott, respetamos tu privacidad y estamos comprometidos con la protección de tus datos personales. Esta política explica qué información recopilamos y cómo la utilizamos.
               </p>
             </div>
 
@@ -43,111 +50,143 @@ const PrivacyPage: React.FC<PrivacyPageProps> = ({ darkMode }) => {
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                 1. Información que Recopilamos
               </h2>
-              <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                Recopilamos información que proporcionas directamente:
-              </p>
-              <ul className={`list-disc list-inside space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                <li>Nombre y correo electrónico al registrarte</li>
-                <li>Información de perfil que proporcionas voluntariamente</li>
-                <li>Reseñas, comentarios y contenido que publicas</li>
-                <li>Información de contacto cuando te comunicas con nosotros</li>
-              </ul>
-            </section>
 
-            <section className="mb-8">
-              <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                2. Información Recopilada Automáticamente
-              </h2>
-              <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                Cuando utilizas nuestro sitio, podemos recopilar automáticamente:
-              </p>
+              <h3 className={`text-xl font-semibold mb-3 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+                Información de Registro
+              </h3>
+              <ul className={`list-disc list-inside space-y-2 mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                <li>Correo electrónico</li>
+                <li>Nombre de usuario</li>
+                <li>Contraseña (encriptada)</li>
+                <li>Fecha de registro</li>
+              </ul>
+
+              <h3 className={`text-xl font-semibold mb-3 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+                Información de Uso
+              </h3>
+              <ul className={`list-disc list-inside space-y-2 mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                <li>Reseñas y calificaciones de profesores</li>
+                <li>Publicaciones y comentarios en el foro</li>
+                <li>Mensajes en el chat</li>
+                <li>Historial de búsquedas y navegación</li>
+              </ul>
+
+              <h3 className={`text-xl font-semibold mb-3 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+                Información Técnica
+              </h3>
               <ul className={`list-disc list-inside space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
                 <li>Dirección IP</li>
                 <li>Tipo de navegador y dispositivo</li>
-                <li>Páginas visitadas y tiempo de permanencia</li>
-                <li>Datos de referencia y estadísticas de uso</li>
+                <li>Sistema operativo</li>
+                <li>Cookies y tecnologías similares</li>
               </ul>
             </section>
 
             <section className="mb-8">
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                3. Cómo Utilizamos Tu Información
+                2. Cómo Usamos tu Información
               </h2>
               <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                Utilizamos tu información para:
+                Utilizamos la información recopilada para:
               </p>
               <ul className={`list-disc list-inside space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                <li>Proporcionar y mejorar nuestros servicios</li>
+                <li>Proporcionar y mantener nuestros servicios</li>
+                <li>Autenticar tu identidad y proteger tu cuenta</li>
                 <li>Personalizar tu experiencia en la plataforma</li>
-                <li>Comunicarnos contigo sobre cambios o actualizaciones</li>
-                <li>Prevenir fraude y actividades ilícitas</li>
-                <li>Cumplir con obligaciones legales y reglamentarias</li>
+                <li>Moderar contenido y prevenir abusos</li>
+                <li>Mejorar nuestros servicios y desarrollar nuevas funcionalidades</li>
+                <li>Comunicarnos contigo sobre actualizaciones o cambios importantes</li>
+                <li>Cumplir con obligaciones legales</li>
               </ul>
             </section>
 
             <section className="mb-8">
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                4. Seguridad de Datos
+                3. Base Legal para el Procesamiento
+              </h2>
+              <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                Procesamos tus datos personales bajo las siguientes bases legales:
+              </p>
+              <ul className={`list-disc list-inside space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                <li>Consentimiento: Al registrarte y usar nuestros servicios</li>
+                <li>Ejecución de contrato: Para proporcionar los servicios solicitados</li>
+                <li>Interés legítimo: Para mejorar y proteger nuestros servicios</li>
+                <li>Obligación legal: Cuando sea requerido por ley</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                4. Compartir Información
+              </h2>
+              <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                No vendemos tu información personal. Podemos compartir información limitada con:
+              </p>
+              <ul className={`list-disc list-inside space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                <li>Proveedores de servicios: Firebase/Google para autenticación y almacenamiento</li>
+                <li>Usuarios públicos: Tu nombre de usuario y contenido público (reseñas, foro)</li>
+                <li>Autoridades: Cuando sea requerido por ley o para proteger derechos</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                5. Seguridad de los Datos
+              </h2>
+              <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                Implementamos medidas de seguridad para proteger tus datos:
+              </p>
+              <ul className={`list-disc list-inside space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                <li>Encriptación de contraseñas mediante Firebase Authentication</li>
+                <li>Conexiones seguras HTTPS</li>
+                <li>Acceso restringido a datos personales</li>
+                <li>Monitoreo regular de seguridad</li>
+                <li>Copias de seguridad regulares</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                6. Retención de Datos
               </h2>
               <p className={darkMode ? 'text-gray-400' : 'text-gray-700'}>
-                Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger tu información contra acceso no autorizado, alteración, divulgación o destrucción. Sin embargo, ningún método de transmisión por Internet es 100% seguro.
+                Conservamos tu información mientras tu cuenta esté activa o según sea necesario para proporcionar servicios. Puedes solicitar la eliminación de tu cuenta y datos asociados en cualquier momento.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                5. Compartir Información
-              </h2>
-              <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                No vendemos ni alquilamos tu información personal. Podemos compartir información:
-              </p>
-              <ul className={`list-disc list-inside space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                <li>Con proveedores de servicios que nos ayudan a operar la plataforma</li>
-                <li>Cuando es requerido por ley o autoridades competentes</li>
-                <li>Para proteger los derechos, privacidad y seguridad de nuestros usuarios</li>
-              </ul>
-            </section>
-
-            <section className="mb-8">
-              <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                6. Tus Derechos
+                7. Tus Derechos
               </h2>
               <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
                 Tienes derecho a:
               </p>
               <ul className={`list-disc list-inside space-y-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-                <li>Acceder a tu información personal</li>
-                <li>Corregir datos inexactos</li>
-                <li>Solicitar la eliminación de tu información</li>
-                <li>Optar por no recibir comunicaciones de marketing</li>
+                <li>Acceder a tus datos personales</li>
+                <li>Rectificar información incorrecta</li>
+                <li>Eliminar tu cuenta y datos asociados</li>
+                <li>Exportar tus datos en formato portable</li>
+                <li>Oponerte al procesamiento de tus datos</li>
+                <li>Limitar el procesamiento en ciertas circunstancias</li>
                 <li>Retirar tu consentimiento en cualquier momento</li>
               </ul>
             </section>
 
             <section className="mb-8">
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                7. Cookies y Tecnologías Similares
+                8. Cookies
               </h2>
               <p className={darkMode ? 'text-gray-400' : 'text-gray-700'}>
-                Utilizamos cookies y tecnologías similares para mejorar tu experiencia de usuario, recordar tus preferencias y analizar el uso de la plataforma. Puedes controlar las cookies a través de la configuración de tu navegador.
+                Utilizamos cookies y tecnologías similares para mejorar tu experiencia. Las cookies nos ayudan a recordar tus preferencias (como el modo oscuro) y proporcionar funciones esenciales del servicio. Puedes configurar tu navegador para rechazar cookies, aunque esto puede afectar la funcionalidad.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                8. Retención de Datos
+                9. Privacidad de Menores
               </h2>
               <p className={darkMode ? 'text-gray-400' : 'text-gray-700'}>
-                Conservamos tu información personal solo durante el tiempo que sea necesario para proporcionarte los servicios y cumplir con nuestras obligaciones legales. Cuando cierres tu cuenta, eliminaremos tus datos personales de acuerdo con nuestras políticas de retención.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                9. Enlaces a Terceros
-              </h2>
-              <p className={darkMode ? 'text-gray-400' : 'text-gray-700'}>
-                Nuestra plataforma puede contener enlaces a sitios web de terceros. No somos responsables de las prácticas de privacidad de estos sitios. Te recomendamos revisar sus políticas de privacidad.
+                Nuestros servicios están dirigidos a estudiantes universitarios mayores de 18 años. No recopilamos intencionalmente información de menores de edad.
               </p>
             </section>
 
@@ -156,22 +195,31 @@ const PrivacyPage: React.FC<PrivacyPageProps> = ({ darkMode }) => {
                 10. Cambios a esta Política
               </h2>
               <p className={darkMode ? 'text-gray-400' : 'text-gray-700'}>
-                Podemos actualizar esta política de privacidad periódicamente. Los cambios serán notificados a través de la plataforma. Tu uso continuado del servicio indica tu aceptación de los cambios.
+                Podemos actualizar esta política periódicamente. Te notificaremos sobre cambios significativos mediante un aviso en la plataforma o por correo electrónico. Te recomendamos revisar esta política regularmente.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                11. Contacto
+                11. Transferencia Internacional
               </h2>
               <p className={darkMode ? 'text-gray-400' : 'text-gray-700'}>
-                Si tienes preguntas sobre esta política de privacidad o sobre cómo manejamos tu información, puedes contactarnos a través del chat de soporte en la plataforma.
+                Tus datos pueden ser transferidos y almacenados en servidores ubicados fuera de República Dominicana. Utilizamos proveedores que cumplen con estándares internacionales de protección de datos.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                12. Contacto
+              </h2>
+              <p className={darkMode ? 'text-gray-400' : 'text-gray-700'}>
+                Si tienes preguntas sobre esta política de privacidad o deseas ejercer tus derechos, puedes contactarnos a través del chat de soporte en la plataforma.
               </p>
             </section>
 
             <div className={`mt-12 pt-8 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
               <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
-                Última actualización: {new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                Última actualización: 18/2/2026
               </p>
             </div>
           </div>

@@ -14,6 +14,7 @@ interface TopicViewProps {
   messages: Message[];
   onBack: () => void;
   onSendMessage: (content: string) => void;
+  onDeleteMessage: (messageId: string) => void;
   darkMode: boolean;
 }
 
@@ -22,6 +23,7 @@ const TopicView: React.FC<TopicViewProps> = ({
   messages,
   onBack,
   onSendMessage,
+  onDeleteMessage,
   darkMode
 }) => {
   const [newMessage, setNewMessage] = useState('');
@@ -39,14 +41,18 @@ const TopicView: React.FC<TopicViewProps> = ({
       }
     };
     init();
-  }, []);
+    window.scrollTo(0, 0);
+  }, [topic.id]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0) {
+      const timer = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timer);
+    }
   }, [messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -73,10 +79,10 @@ const TopicView: React.FC<TopicViewProps> = ({
   const handleDeleteMessage = async (messageId: string) => {
     if (window.confirm('Estas seguro de que quieres eliminar este mensaje?')) {
       const result = await deleteMessage(topic.id, messageId);
-      
+
       if (result.success) {
         toast.success('Mensaje eliminado exitosamente');
-        window.location.reload();
+        onDeleteMessage(messageId);
       } else {
         toast.error(result.error || 'Error al eliminar el mensaje');
       }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { GraduationCap, Menu, X, Moon, Sun, LogIn, CircleUser as UserCircle, HelpCircle, MessageSquare, Shield } from 'lucide-react';
 import ProfileDropdown from './ProfileDropdown';
@@ -27,6 +27,7 @@ const Navigation: React.FC<NavigationProps> = ({
   isUserAdmin,
 }) => {
   const location = useLocation();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -38,6 +39,22 @@ const Navigation: React.FC<NavigationProps> = ({
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    if (showProfileDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileDropdown, setShowProfileDropdown]);
 
   return (
     <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md sticky top-0 z-50`}>
@@ -54,7 +71,7 @@ const Navigation: React.FC<NavigationProps> = ({
           <h1 className={`text-lg sm:text-xl md:text-2xl font-bold ${
             darkMode ? 'text-white' : 'text-gray-800'
           } group-hover:text-blue-500 transition-colors duration-200`}>
-            UASD 2025-10
+            Misemestre
           </h1>
         </Link>
 
@@ -72,7 +89,7 @@ const Navigation: React.FC<NavigationProps> = ({
               <span className="hidden sm:inline">Iniciar Sesion</span>
             </button>
           ) : (
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm ${
@@ -207,10 +224,10 @@ const NavLink: React.FC<NavLinkProps> = ({
       isActive
         ? darkMode
           ? 'bg-gray-700 text-white'
-          : 'bg-blue-100 text-blue-700'
+          : 'bg-gray-100 text-blue-700'
         : darkMode
           ? 'text-gray-300 hover:text-white'
-          : 'text-gray-600 hover:text-gray-900'
+          : 'text-gray-600 hover:text-blue-500'
     }`}
   >
     {children}

@@ -92,6 +92,14 @@ const ProfessorDetailsModal: React.FC<ProfessorDetailsModalProps> = ({
           punctuality: Number((totals.punctuality / count).toFixed(1)),
           wouldTakeAgain: Number((totals.wouldTakeAgain / count).toFixed(1))
         });
+      } else {
+        setStats({
+          rating: 0,
+          clarity: 0,
+          fairness: 0,
+          punctuality: 0,
+          wouldTakeAgain: 0
+        });
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);

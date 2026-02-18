@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, X, LogIn } from 'lucide-react';
 import { useSupabaseChat } from '../hooks/useSupabaseChat';
-import { useAuth } from '../hooks/useAuth';
+import { useAuthContext } from '../contexts/AuthContext';
 import ChatMessages from './Chat/ChatMessages';
 import ChatInput from './Chat/ChatInput';
 import ChatEntrance from './Chat/ChatEntrance';
@@ -14,7 +14,7 @@ interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
-  const { user, session, loading: authLoading } = useAuth();
+  const { user, session, loading: authLoading } = useAuthContext();
   const [displayName, setDisplayName] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);

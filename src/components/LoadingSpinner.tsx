@@ -3,12 +3,13 @@ import { Loader2 } from 'lucide-react';
 
 interface LoadingSpinnerProps {
   darkMode: boolean;
+  message?: string;
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ darkMode }) => {
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ darkMode, message = 'Cargando...' }) => {
   return (
     <div className="flex flex-col items-center justify-center w-full py-12">
-      <Loader2 
+      <Loader2
         className={`w-12 h-12 animate-spin ${
           darkMode ? 'text-blue-400' : 'text-blue-600'
         }`}
@@ -16,7 +17,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ darkMode }) => {
       <p className={`mt-4 text-lg font-medium ${
         darkMode ? 'text-gray-200' : 'text-gray-700'
       }`}>
-        Cargando asignaturas...
+        {message}
       </p>
     </div>
   );

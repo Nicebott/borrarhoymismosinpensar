@@ -13,12 +13,13 @@ import VirtualPage from './pages/VirtualPage';
 import SemipresencialPage from './pages/SemipresencialPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
-import { useAuth } from './hooks/useAuth';
+import ProfilePage from './pages/ProfilePage';
+import { useAuthContext } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import { checkIsAdmin, checkIsSuperAdmin } from './services/adminService';
 
 function App() {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
@@ -141,6 +142,10 @@ function App() {
               path="/privacy"
               element={<PrivacyPage darkMode={darkMode} />}
             />
+            <Route
+              path="/perfil"
+              element={<ProfilePage darkMode={darkMode} />}
+            />
           </Routes>
         </main>
 
@@ -149,10 +154,10 @@ function App() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-center md:text-left">
                 <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  (c) 2024 Nicebott. Todos los derechos reservados.
+                  © 2024 Nicebott. Todos los derechos reservados.
                 </p>
                 <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                  Desarrollado con amor para la comunidad estudiantil
+                  Desarrollado con ❤️ para la comunidad estudiantil
                 </p>
               </div>
               <div className="flex gap-4">

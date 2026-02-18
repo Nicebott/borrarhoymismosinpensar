@@ -176,7 +176,7 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
       />
 
       {isLoading ? (
-        <LoadingSpinner darkMode={darkMode} />
+        <LoadingSpinner darkMode={darkMode} message="Cargando asignaturas..." />
       ) : currentSections.length > 0 ? (
         <>
           <CourseTable

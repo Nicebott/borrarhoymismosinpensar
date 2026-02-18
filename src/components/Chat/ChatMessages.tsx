@@ -58,17 +58,27 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
       />
       
       <AnimatePresence>
-        {messages.map((message) => (
-          <ChatMessage
-            key={message.id}
-            message={message}
-            darkMode={darkMode}
-            isCurrentUser={message.username === currentUsername}
-            isAdmin={isAdmin}
-            onDelete={onDeleteMessage}
-            currentUserIsAdmin={isAdmin}
-          />
-        ))}
+        {messages.map((message) => {
+          const initials = message.username
+            .split(' ')
+            .slice(0, 2)
+            .map((word: string) => word[0])
+            .join('')
+            .toUpperCase();
+
+          return (
+            <ChatMessage
+              key={message.id}
+              message={message}
+              darkMode={darkMode}
+              isCurrentUser={message.username === currentUsername}
+              isAdmin={isAdmin}
+              onDelete={onDeleteMessage}
+              currentUserIsAdmin={isAdmin}
+              userInitials={initials}
+            />
+          );
+        })}
       </AnimatePresence>
       <div ref={messagesEndRef} />
     </div>

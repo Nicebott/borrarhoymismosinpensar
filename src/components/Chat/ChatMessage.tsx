@@ -17,6 +17,7 @@ interface ChatMessageProps {
   isAdmin: boolean;
   currentUserIsAdmin?: boolean;
   onDelete: (messageId: string) => void;
+  userInitials?: string;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -25,7 +26,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   isCurrentUser,
   isAdmin,
   onDelete,
-  currentUserIsAdmin
+  currentUserIsAdmin,
+  userInitials = 'US'
 }) => {
   const timeAgo = formatDistanceToNow(new Date(message.timestamp), {
     addSuffix: true,
@@ -36,13 +38,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`mb-3 md:mb-4 ${isCurrentUser ? 'ml-auto' : 'mr-auto'} relative group`}
+      className={`mb-3 md:mb-4 ${isCurrentUser ? 'ml-auto' : 'mr-auto'} relative group flex gap-2 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
     >
+      {!isCurrentUser && (
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-600`}>
+          {userInitials}
+        </div>
+      )}
       <div
         className={`max-w-[85%] md:max-w-[80%] rounded-lg px-3 md:px-4 py-2 ${
           isCurrentUser
             ? darkMode
-              ? 'bg-blue-600 ml-auto'
+              ? 'bg-blue-600'
               : 'bg-blue-500'
             : darkMode
               ? 'bg-gray-700'
