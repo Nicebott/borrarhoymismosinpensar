@@ -52,17 +52,17 @@ const Pagination: React.FC<PaginationProps> = ({
         pages.push(currentPage - 1, currentPage, currentPage + 1, totalPages);
       }
     } else {
-      if (currentPage <= 4) {
-        for (let i = 2; i <= 7; i++) {
+      if (currentPage <= 5) {
+        for (let i = 2; i <= 8; i++) {
           pages.push(i);
         }
         pages.push(totalPages);
-      } else if (currentPage >= totalPages - 3) {
-        for (let i = totalPages - 6; i <= totalPages; i++) {
+      } else if (currentPage >= totalPages - 4) {
+        for (let i = totalPages - 7; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
-        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+        for (let i = currentPage - 3; i <= currentPage + 3; i++) {
           pages.push(i);
         }
         pages.push(totalPages);
