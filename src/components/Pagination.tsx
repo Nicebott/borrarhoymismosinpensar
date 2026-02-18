@@ -32,14 +32,13 @@ const Pagination: React.FC<PaginationProps> = ({
     if (totalPages <= 1) return [];
 
     const isMobile = windowWidth < 640;
-    const maxPageButtons = isMobile ? 5 : 9;
+    const delta = isMobile ? 1 : 2;
 
     const range: number[] = [];
     const rangeWithDots: (number | string)[] = [];
 
     range.push(1);
 
-    const delta = Math.floor((maxPageButtons - 3) / 2);
     const startPage = Math.max(2, currentPage - delta);
     const endPage = Math.min(totalPages - 1, currentPage + delta);
 
