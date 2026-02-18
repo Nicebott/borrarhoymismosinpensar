@@ -32,7 +32,7 @@ const Pagination: React.FC<PaginationProps> = ({
     if (totalPages <= 1) return [];
 
     const maxButtons = isMobile ? 5 : 9;
-    const pages: (number | string)[] = [];
+    const pages: number[] = [];
 
     if (totalPages <= maxButtons + 2) {
       for (let i = 1; i <= totalPages; i++) {
@@ -45,29 +45,27 @@ const Pagination: React.FC<PaginationProps> = ({
 
     if (isMobile) {
       if (currentPage <= 3) {
-        pages.push(2, 3, 4, '...', totalPages);
+        pages.push(2, 3, 4, totalPages);
       } else if (currentPage >= totalPages - 2) {
-        pages.push('...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
       } else {
-        pages.push('...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+        pages.push(currentPage - 1, currentPage, currentPage + 1, totalPages);
       }
     } else {
       if (currentPage <= 4) {
         for (let i = 2; i <= 7; i++) {
           pages.push(i);
         }
-        pages.push('...', totalPages);
+        pages.push(totalPages);
       } else if (currentPage >= totalPages - 3) {
-        pages.push('...');
         for (let i = totalPages - 6; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
-        pages.push('...');
         for (let i = currentPage - 2; i <= currentPage + 2; i++) {
           pages.push(i);
         }
-        pages.push('...', totalPages);
+        pages.push(totalPages);
       }
     }
 
@@ -92,11 +90,10 @@ const Pagination: React.FC<PaginationProps> = ({
       </button>
 
       <div className="flex items-center gap-1 sm:gap-2 justify-center">
-        {pageNumbers.map((number, index) => (
+        {pageNumbers.map((number) => (
           <button
-            key={`page-${number}-${index}`}
-            onClick={() => typeof number === 'number' ? paginate(number) : undefined}
-            disabled={typeof number !== 'number'}
+            key={`page-${number}`}
+            onClick={() => paginate(number)}
             className={`px-2 sm:px-4 py-2 rounded-md flex-shrink-0 min-w-[36px] sm:min-w-[44px] text-xs sm:text-base font-medium ${
               currentPage === number
                 ? darkMode
@@ -105,7 +102,7 @@ const Pagination: React.FC<PaginationProps> = ({
                 : darkMode
                   ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
                   : 'bg-white text-blue-600 hover:bg-blue-50'
-            } ${typeof number !== 'number' ? 'cursor-default hover:bg-transparent pointer-events-none' : 'transition-colors'}`}
+            } transition-colors`}
             aria-current={currentPage === number ? 'page' : undefined}
           >
             {number}
