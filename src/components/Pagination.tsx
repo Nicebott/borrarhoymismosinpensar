@@ -17,13 +17,12 @@ const Pagination: React.FC<PaginationProps> = ({
   darkMode
 }) => {
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  
+  // Estado para detectar cambios de tamaño de pantalla en tiempo real
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
+    const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -31,37 +30,41 @@ const Pagination: React.FC<PaginationProps> = ({
   const pageNumbers = useMemo(() => {
     if (totalPages <= 1) return [];
 
+    // Lógica adaptativa: Celular (delta 1) vs PC (delta 2)
     const isMobile = windowWidth < 640;
     const delta = isMobile ? 1 : 2;
 
     const range: number[] = [];
     const rangeWithDots: (number | string)[] = [];
 
+    // Siempre mostrar la página 1
     range.push(1);
 
+    // Calcular el rango alrededor de la página actual
     for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
       range.push(i);
     }
 
+    // Siempre mostrar la última página
     if (totalPages > 1) {
       range.push(totalPages);
     }
 
+    // Rellenar con puntos suspensivos (...) donde haya huecos
     let previousPage: number | undefined;
 
-    for (let i = 0; i < range.length; i++) {
-      const currentPageNum = range[i];
-
+    for (const page of range) {
       if (previousPage !== undefined) {
-        if (currentPageNum - previousPage === 2) {
+        if (page - previousPage === 2) {
+          // Si el hueco es de solo 1 número, mostramos ese número (ej: 1, [2], 3)
           rangeWithDots.push(previousPage + 1);
-        } else if (currentPageNum - previousPage > 2) {
+        } else if (page - previousPage > 2) {
+          // Si el hueco es grande, mostramos ...
           rangeWithDots.push('...');
         }
       }
-
-      rangeWithDots.push(currentPageNum);
-      previousPage = currentPageNum;
+      rangeWithDots.push(page);
+      previousPage = page;
     }
 
     return rangeWithDots;
@@ -71,6 +74,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <nav className="flex justify-center items-center gap-2 mt-4 px-2 w-full" aria-label="Pagination">
+      {/* Botón Anterior */}
       <button
         onClick={() => paginate(currentPage - 1)}
         disabled={currentPage === 1}
@@ -79,34 +83,32 @@ const Pagination: React.FC<PaginationProps> = ({
             ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 disabled:text-gray-600'
             : 'bg-white text-blue-600 hover:bg-blue-50 disabled:text-gray-400'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
-        aria-label="Pagina anterior"
+        aria-label="Página anterior"
       >
         <ChevronLeft size={20} className="sm:w-5 sm:h-5" />
       </button>
 
+      {/* Números de Página */}
       <div className="flex items-center gap-1 sm:gap-2 justify-center overflow-x-auto scrollbar-hide">
         {pageNumbers.map((number, index) => {
-          const isNumber = typeof number === 'number';
-          const isActive = currentPage === number;
-
+          const isCurrent = currentPage === number;
+          
           return (
             <button
               key={`${number}-${index}`}
-              onClick={() => isNumber ? paginate(number) : undefined}
-              disabled={!isNumber}
-              className={`px-2 sm:px-4 py-2 rounded-md flex-shrink-0 min-w-[40px] sm:min-w-[44px] text-sm sm:text-base font-medium ${
-                isActive
+              // CORRECCIÓN CLAVE AQUÍ ABAJO: Validación de tipo explícita
+              onClick={() => typeof number === 'number' && paginate(number)}
+              disabled={typeof number !== 'number'}
+              className={`px-3 sm:px-4 py-2 rounded-md flex-shrink-0 min-w-[40px] sm:min-w-[44px] text-sm sm:text-base font-medium ${
+                isCurrent
                   ? 'bg-blue-600 text-white shadow-md'
-                  : isNumber
+                  : typeof number === 'number'
                     ? darkMode
                       ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
                       : 'bg-white text-blue-600 hover:bg-blue-50'
-                    : darkMode
-                      ? 'bg-transparent text-gray-500 cursor-default'
-                      : 'bg-transparent text-gray-400 cursor-default'
-              } ${isNumber ? 'transition-colors' : ''}`}
-              aria-current={isActive ? 'page' : undefined}
-              aria-label={isNumber ? `Ir a la pagina ${number}` : undefined}
+                    : 'bg-transparent cursor-default ' + (darkMode ? 'text-gray-500' : 'text-gray-400')
+              } ${typeof number === 'number' ? 'transition-colors' : ''}`}
+              aria-current={isCurrent ? 'page' : undefined}
             >
               {number}
             </button>
@@ -114,6 +116,7 @@ const Pagination: React.FC<PaginationProps> = ({
         })}
       </div>
 
+      {/* Botón Siguiente */}
       <button
         onClick={() => paginate(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -122,7 +125,7 @@ const Pagination: React.FC<PaginationProps> = ({
             ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 disabled:text-gray-600'
             : 'bg-white text-blue-600 hover:bg-blue-50 disabled:text-gray-400'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
-        aria-label="Pagina siguiente"
+        aria-label="Página siguiente"
       >
         <ChevronRight size={20} className="sm:w-5 sm:h-5" />
       </button>
