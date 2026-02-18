@@ -1,35 +1,24 @@
-import React, { useState } from 'react';
-import { MessageCircle, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { MessageCircle, X, LogIn } from 'lucide-react';
 import { useSupabaseChat } from '../hooks/useSupabaseChat';
+import { useAuth } from '../hooks/useAuth';
 import ChatMessages from './Chat/ChatMessages';
 import ChatInput from './Chat/ChatInput';
-import LoginForm from './Chat/LoginForm';
+import ChatEntrance from './Chat/ChatEntrance';
 import { supabase } from '../supabase';
+import { checkIsAdmin, checkIsSuperAdmin } from '../services/adminService';
 
 interface ChatProps {
   darkMode?: boolean;
+  onOpenAuth?: () => void;
 }
 
-const verifyAdminPassword = async (password: string): Promise<boolean> => {
-  try {
-    const { data } = await supabase
-      .from('chat_config')
-      .select('value')
-      .eq('key', 'admin_password')
-      .maybeSingle();
-
-    return data?.value === password;
-  } catch (error) {
-    console.error('Error verifying admin:', error);
-    return false;
-  }
-};
-
-const Chat: React.FC<ChatProps> = ({ darkMode = false }) => {
-  const [username, setUsername] = useState('');
+const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
+  const { user, session, loading: authLoading } = useAuth();
+  const [displayName, setDisplayName] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isUsernameSet, setIsUsernameSet] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [hasEnteredChat, setHasEnteredChat] = useState(false);
 
   const {
     messages,
@@ -37,29 +26,47 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false }) => {
     unreadCount,
     sendMessage,
     loadMoreMessages,
-    deleteMessage
-  } = useSupabaseChat(isChatOpen);
+    deleteMessage,
+  } = useSupabaseChat(isChatOpen, displayName, user?.id);
 
-  const handleLogin = async (username: string, password: string) => {
-    if (username.trim()) {
-      if (username.toLowerCase() === 'admin') {
-        const isValidAdmin = await verifyAdminPassword(password);
-        if (isValidAdmin) {
-          setIsAdmin(true);
-          setUsername(username);
-          setIsUsernameSet(true);
-        } else {
-          alert('Contrasena de administrador incorrecta');
-        }
-      } else {
-        setUsername(username);
-        setIsUsernameSet(true);
-      }
+  useEffect(() => {
+    const chatEntered = localStorage.getItem('chatEntered');
+    if (chatEntered === 'true') {
+      setHasEnteredChat(true);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user && session) {
+      const fetchProfile = async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (data?.display_name) {
+          setDisplayName(data.display_name);
+        }
+      };
+
+      fetchProfile();
+
+      const checkAdminStatus = async () => {
+        const isAdminUser = await checkIsAdmin(user.id);
+        const isSuperAdminUser = await checkIsSuperAdmin(user.id);
+        setIsAdmin(isAdminUser || isSuperAdminUser);
+      };
+
+      checkAdminStatus();
+    } else {
+      setHasEnteredChat(false);
+      localStorage.removeItem('chatEntered');
+    }
+  }, [user, session]);
 
   const handleSendMessage = async (text: string) => {
-    const success = await sendMessage(text, username, isAdmin);
+    const success = await sendMessage(text);
     if (!success) {
       alert('Error al enviar el mensaje. Por favor, intenta de nuevo.');
     }
@@ -71,6 +78,17 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false }) => {
       if (!success) {
         alert('Error al eliminar el mensaje. Por favor, intenta de nuevo.');
       }
+    }
+  };
+
+  const handleEnterChat = () => {
+    setHasEnteredChat(true);
+    localStorage.setItem('chatEntered', 'true');
+  };
+
+  const handleOpenAuth = () => {
+    if (onOpenAuth) {
+      onOpenAuth();
     }
   };
 
@@ -107,14 +125,64 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false }) => {
           </div>
 
           <div className="p-3 md:p-4">
-            {!isUsernameSet ? (
-              <LoginForm onLogin={handleLogin} darkMode={darkMode} />
+            {authLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : !user || !session ? (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                    darkMode ? 'bg-gray-700' : 'bg-blue-50'
+                  }`}>
+                    <MessageCircle className={`w-8 h-8 ${
+                      darkMode ? 'text-blue-400' : 'text-blue-500'
+                    }`} />
+                  </div>
+                  <h3 className={`text-xl font-bold mb-2 ${
+                    darkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Chat en Tiempo Real
+                  </h3>
+                  <p className={`text-xs md:text-sm ${
+                    darkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Inicia sesion para unirte a la conversacion
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleOpenAuth}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors text-sm ${
+                    darkMode
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  }`}
+                >
+                  <LogIn size={18} />
+                  <span>Iniciar Sesion</span>
+                </button>
+              </div>
+            ) : !hasEnteredChat ? (
+              <ChatEntrance darkMode={darkMode} onEnter={handleEnterChat} />
             ) : (
               <>
+                {isAdmin && (
+                  <div className={`mb-4 p-2 rounded-lg flex items-center justify-center ${
+                    darkMode ? 'bg-yellow-900/30 border border-yellow-700' : 'bg-yellow-50 border border-yellow-200'
+                  }`}>
+                    <span className={`text-xs font-semibold ${
+                      darkMode ? 'text-yellow-300' : 'text-yellow-700'
+                    }`}>
+                      Modo Administrador Activo
+                    </span>
+                  </div>
+                )}
+
                 <ChatMessages
                   messages={messages}
                   darkMode={darkMode}
-                  currentUsername={username}
+                  currentUsername={displayName}
                   onLoadMore={loadMoreMessages}
                   loading={loading}
                   isAdmin={isAdmin}
@@ -123,6 +191,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false }) => {
                 <ChatInput
                   onSendMessage={handleSendMessage}
                   darkMode={darkMode}
+                  username={displayName}
                 />
               </>
             )}

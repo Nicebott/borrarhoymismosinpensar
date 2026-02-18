@@ -4,7 +4,7 @@ import { Message } from '../types';
 
 const MESSAGES_PER_PAGE = 50;
 
-export function useSupabaseChat(isOpen: boolean) {
+export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -102,19 +102,19 @@ export function useSupabaseChat(isOpen: boolean) {
   }, [isOpen]);
 
   const sendMessage = useCallback(
-    async (text: string, username: string, isAdmin: boolean) => {
+    async (text: string) => {
       try {
         const { error } = await supabase.from('chat_messages').insert({
           text,
-          username,
-          is_admin: isAdmin,
+          username: displayName,
+          is_admin: false,
         });
         return !error;
       } catch {
         return false;
       }
     },
-    []
+    [displayName]
   );
 
   const deleteMessage = useCallback(async (messageId: string) => {

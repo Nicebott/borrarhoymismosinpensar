@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { GraduationCap, Menu, X, Moon, Sun, LogIn, CircleUser as UserCircle, HelpCircle, MessageSquare, Shield } from 'lucide-react';
 import ProfileDropdown from './ProfileDropdown';
 
@@ -11,15 +12,7 @@ interface NavigationProps {
   showProfileDropdown: boolean;
   setShowProfileDropdown: (show: boolean) => void;
   setIsAuthModalOpen: (isOpen: boolean) => void;
-  selectedModality: string;
-  handleModalityChange: (modality: string) => void;
-  scrollToTop: () => void;
-  handleFAQClick: () => void;
-  showFAQ: boolean;
-  showForum: boolean;
-  handleForumClick: () => void;
-  showAdmin: boolean;
-  handleAdminClick: () => void;
+  isUserAdmin: boolean;
 }
 
 const Navigation: React.FC<NavigationProps> = ({
@@ -31,33 +24,39 @@ const Navigation: React.FC<NavigationProps> = ({
   showProfileDropdown,
   setShowProfileDropdown,
   setIsAuthModalOpen,
-  selectedModality,
-  handleModalityChange,
-  scrollToTop,
-  handleFAQClick,
-  showFAQ,
-  showForum,
-  handleForumClick,
-  showAdmin,
-  handleAdminClick,
+  isUserAdmin,
 }) => {
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/' && !location.search.includes('modality');
+    }
+    return location.pathname === path || location.search.includes(path.split('?')[1] || '');
+  };
+
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md sticky top-0 z-50`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center relative">
-        <button
-          onClick={scrollToTop}
+        <Link
+          to="/"
+          onClick={handleLinkClick}
           className="flex items-center group transition-colors duration-200"
         >
-          <GraduationCap 
-            size={40} 
-            className={`${darkMode ? 'text-blue-400' : 'text-blue-600'} mr-3 group-hover:scale-110 transition-transform duration-200`} 
+          <GraduationCap
+            size={40}
+            className={`${darkMode ? 'text-blue-400' : 'text-blue-600'} mr-3 group-hover:scale-110 transition-transform duration-200`}
           />
           <h1 className={`text-lg sm:text-xl md:text-2xl font-bold ${
             darkMode ? 'text-white' : 'text-gray-800'
           } group-hover:text-blue-500 transition-colors duration-200`}>
             UASD 2025-10
           </h1>
-        </button>
+        </Link>
 
         <div className="flex items-center gap-2 md:gap-4">
           {!user ? (
@@ -86,8 +85,8 @@ const Navigation: React.FC<NavigationProps> = ({
                 <span className="hidden sm:inline">{user.displayName || 'Usuario'}</span>
               </button>
               {showProfileDropdown && (
-                <ProfileDropdown 
-                  darkMode={darkMode} 
+                <ProfileDropdown
+                  darkMode={darkMode}
                   onClose={() => setShowProfileDropdown(false)}
                   displayName={user.displayName}
                 />
@@ -105,7 +104,7 @@ const Navigation: React.FC<NavigationProps> = ({
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          <button 
+          <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-1.5"
           >
@@ -118,7 +117,7 @@ const Navigation: React.FC<NavigationProps> = ({
         </div>
 
         <nav className={`${
-          isMenuOpen 
+          isMenuOpen
             ? 'fixed top-16 left-0 right-0 bottom-0 overflow-y-auto'
             : 'hidden'
         } md:block md:static md:w-auto md:shadow-none md:mt-0 md:overflow-visible ${
@@ -126,51 +125,59 @@ const Navigation: React.FC<NavigationProps> = ({
         } md:bg-transparent z-40`}
         >
           <div className="flex flex-col md:flex-row md:items-center gap-2 p-4 md:p-0 min-h-full md:min-h-0">
-            <NavButton
-              onClick={scrollToTop}
-              isActive={!selectedModality && !showFAQ && !showForum && !showAdmin}
+            <NavLink
+              to="/"
+              isActive={isActive('/')}
               darkMode={darkMode}
+              onClick={handleLinkClick}
             >
               Inicio
-            </NavButton>
-            <NavButton
-              onClick={() => handleModalityChange('virtual')}
-              isActive={selectedModality === 'virtual'}
+            </NavLink>
+            <NavLink
+              to="/virtual"
+              isActive={isActive('/virtual')}
               darkMode={darkMode}
+              onClick={handleLinkClick}
             >
               Virtual
-            </NavButton>
-            <NavButton
-              onClick={() => handleModalityChange('semipresencial')}
-              isActive={selectedModality === 'semipresencial'}
+            </NavLink>
+            <NavLink
+              to="/semipresencial"
+              isActive={isActive('/semipresencial')}
               darkMode={darkMode}
+              onClick={handleLinkClick}
             >
               SemiPresencial
-            </NavButton>
-            <NavButton
-              onClick={handleForumClick}
-              isActive={showForum}
+            </NavLink>
+            <NavLink
+              to="/foro"
+              isActive={isActive('/foro')}
               darkMode={darkMode}
+              onClick={handleLinkClick}
             >
               <MessageSquare size={16} className="mr-1.5" />
               Foro
-            </NavButton>
-            <NavButton
-              onClick={handleFAQClick}
-              isActive={showFAQ}
+            </NavLink>
+            <NavLink
+              to="/faq"
+              isActive={isActive('/faq')}
               darkMode={darkMode}
+              onClick={handleLinkClick}
             >
               <HelpCircle size={16} className="mr-1.5" />
               FAQ
-            </NavButton>
-            <NavButton
-              onClick={handleAdminClick}
-              isActive={showAdmin}
-              darkMode={darkMode}
-            >
-              <Shield size={16} className="mr-1.5" />
-              Admin
-            </NavButton>
+            </NavLink>
+            {isUserAdmin && (
+              <NavLink
+                to="/admin"
+                isActive={isActive('/admin')}
+                darkMode={darkMode}
+                onClick={handleLinkClick}
+              >
+                <Shield size={16} className="mr-1.5" />
+                Admin
+              </NavLink>
+            )}
           </div>
         </nav>
       </div>
@@ -178,33 +185,36 @@ const Navigation: React.FC<NavigationProps> = ({
   );
 };
 
-interface NavButtonProps {
-  onClick: () => void;
+interface NavLinkProps {
+  to: string;
   isActive: boolean;
   darkMode: boolean;
+  onClick: () => void;
   children: React.ReactNode;
 }
 
-const NavButton: React.FC<NavButtonProps> = ({
-  onClick,
+const NavLink: React.FC<NavLinkProps> = ({
+  to,
   isActive,
   darkMode,
+  onClick,
   children
 }) => (
-  <button
+  <Link
+    to={to}
     onClick={onClick}
     className={`flex items-center px-4 py-3 md:px-3 md:py-1.5 rounded-md text-sm font-medium transition-colors duration-200 w-full md:w-auto justify-start md:justify-center ${
       isActive
-        ? darkMode 
+        ? darkMode
           ? 'bg-gray-700 text-white border-l-4 border-blue-400 md:border-l-0'
           : 'bg-gray-100 text-blue-800 border-l-4 border-blue-500 md:border-l-0'
-        : darkMode 
-          ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-700 hover:border-l-4 hover:border-blue-400 md:hover:border-l-0' 
+        : darkMode
+          ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-700 hover:border-l-4 hover:border-blue-400 md:hover:border-l-0'
           : 'text-gray-600 hover:text-blue-600 hover:bg-gray-100 hover:border-l-4 hover:border-blue-500 md:hover:border-l-0'
     }`}
   >
     {children}
-  </button>
+  </Link>
 );
 
 export default Navigation;

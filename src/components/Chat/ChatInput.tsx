@@ -5,9 +5,10 @@ import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   darkMode: boolean;
+  username?: string;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, darkMode }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, darkMode, username }) => {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
