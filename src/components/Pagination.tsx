@@ -21,7 +21,6 @@ const Pagination: React.FC<PaginationProps> = ({
   const pageNumbers = useMemo(() => {
     if (totalPages <= 1) return [];
     
-    // Lógica original del repositorio: verifica el ancho directamente
     const isMobile = window.innerWidth < 640;
     const delta = isMobile ? 1 : 2;
     const range = [];
@@ -51,7 +50,7 @@ const Pagination: React.FC<PaginationProps> = ({
     }
 
     return rangeWithDots;
-  }, [currentPage, totalPages]); // Se eliminó la dependencia de windowWidth que causaba diferencias
+  }, [currentPage, totalPages]);
 
   if (pageNumbers.length <= 1) return null;
 
@@ -74,7 +73,6 @@ const Pagination: React.FC<PaginationProps> = ({
         {pageNumbers.map((number, index) => (
           <button
             key={index}
-            // TypeScript detecta correctamente que si es número, se pasa a paginate
             onClick={() => typeof number === 'number' ? paginate(number) : undefined}
             disabled={typeof number !== 'number'}
             className={`px-3 sm:px-4 py-2 rounded-md flex-shrink-0 min-w-[40px] sm:min-w-[44px] text-sm sm:text-base font-medium ${
