@@ -32,7 +32,7 @@ const Pagination: React.FC<PaginationProps> = ({
     if (totalPages <= 1) return [];
 
     const isMobile = windowWidth < 640;
-    const delta = isMobile ? 1 : 2;
+    const delta = isMobile ? 2 : 4;
 
     const range: number[] = [];
     const rangeWithDots: (number | string)[] = [];
