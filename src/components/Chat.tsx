@@ -168,18 +168,6 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
               <ChatEntrance darkMode={darkMode} onEnter={handleEnterChat} />
             ) : (
               <>
-                {isAdmin && (
-                  <div className={`mb-4 p-2 rounded-lg flex items-center justify-center ${
-                    darkMode ? 'bg-yellow-900/30 border border-yellow-700' : 'bg-yellow-50 border border-yellow-200'
-                  }`}>
-                    <span className={`text-xs font-semibold ${
-                      darkMode ? 'text-yellow-300' : 'text-yellow-700'
-                    }`}>
-                      Modo Administrador Activo
-                    </span>
-                  </div>
-                )}
-
                 <ChatMessages
                   messages={messages}
                   darkMode={darkMode}

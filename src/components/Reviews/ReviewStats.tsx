@@ -33,7 +33,7 @@ const ReviewStats: React.FC<ReviewStatsProps> = ({
           <span className={`text-4xl font-bold ${
             darkMode ? 'text-white' : 'text-gray-900'
           }`}>
-            {stats.rating.toFixed(1)}
+            {stats.rating.toFixed(1)}/10
           </span>
           <RatingStars
             rating={stats.rating}

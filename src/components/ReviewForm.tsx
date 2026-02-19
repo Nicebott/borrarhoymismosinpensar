@@ -31,7 +31,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 
   useEffect(() => {
     const average = (clarity + fairness + punctuality + wouldTakeAgain) / 4;
-    setRating(Math.round(average));
+    setRating(Number(average.toFixed(1)));
   }, [clarity, fairness, punctuality, wouldTakeAgain]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,7 +67,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               <span className={`text-4xl font-bold ${
                 darkMode ? 'text-white' : 'text-gray-900'
               }`}>
-                {rating / 2}/5
+                {(rating / 2).toFixed(1)}/5
               </span>
               <RatingStars
                 rating={rating}

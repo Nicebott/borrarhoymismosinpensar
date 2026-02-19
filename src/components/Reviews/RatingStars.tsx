@@ -27,30 +27,46 @@ const RatingStars: React.FC<RatingStarsProps> = ({
 
   const starSize = starSizes[size];
 
+  const totalStars = maxRating / 2;
+  const starsToFill = rating / 2;
+  const fullStars = Math.floor(starsToFill);
+  const partialStar = starsToFill - fullStars;
+
   return (
     <div className="flex">
-      {[...Array(maxRating / 2)].map((_, index) => {
+      {[...Array(totalStars)].map((_, index) => {
         const starValue = (index + 1) * 2;
-        const isFilled = starValue <= rating;
+        let fillPercentage = 0;
+
+        if (index < fullStars) {
+          fillPercentage = 100;
+        } else if (index === fullStars && partialStar > 0) {
+          fillPercentage = partialStar * 100;
+        }
 
         return (
           <motion.div
             key={index}
             whileHover={interactive ? { scale: 1.2 } : {}}
             whileTap={interactive ? { scale: 0.9 } : {}}
-            className={interactive ? 'cursor-pointer' : ''}
+            className={interactive ? 'cursor-pointer relative' : 'relative'}
             onClick={() => interactive && onChange?.(starValue)}
           >
             <Star
               size={starSize}
               className={`${
-                isFilled
-                  ? 'text-yellow-400 fill-current'
-                  : darkMode
-                    ? 'text-gray-600'
-                    : 'text-gray-300'
+                darkMode ? 'text-gray-600' : 'text-gray-300'
               } transition-colors duration-200`}
             />
+            <div
+              className="absolute top-0 left-0 overflow-hidden"
+              style={{ width: `${fillPercentage}%` }}
+            >
+              <Star
+                size={starSize}
+                className="text-yellow-400 fill-current"
+              />
+            </div>
           </motion.div>
         );
       })}
