@@ -100,16 +100,16 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
         onClick={() => setIsChatOpen(!isChatOpen)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg z-50 flex items-center justify-center transition-colors"
+        className="fixed bottom-4 right-4 w-12 h-12 md:w-13 md:h-13 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg z-50 flex items-center justify-center transition-colors"
       >
-        <MessageCircle className="w-6 h-6 text-white" />
+        <MessageCircle className="w-5 h-5 md:w-5 md:h-5 text-white" />
         {!isChatOpen && unreadCount > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-md"
+            className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center font-bold shadow-md"
           >
-            {unreadCount}
+            {unreadCount > 9 ? '9+' : unreadCount}
           </motion.span>
         )}
       </motion.button>
@@ -121,7 +121,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`fixed inset-x-4 bottom-20 md:bottom-20 md:right-4 md:left-auto md:w-96 shadow-2xl rounded-2xl z-[60] backdrop-blur-sm overflow-hidden ${
+            className={`fixed inset-x-4 bottom-[4.5rem] md:bottom-[4.5rem] md:right-4 md:left-auto md:w-96 shadow-2xl rounded-2xl z-[60] backdrop-blur-sm overflow-hidden ${
               darkMode ? 'bg-gray-800/95 border border-gray-700/50' : 'bg-white/95 border border-gray-200'
             }`}
           >
