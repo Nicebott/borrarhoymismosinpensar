@@ -4,7 +4,7 @@ import HomePage from './HomePage';
 
 interface VirtualPageProps {
   darkMode: boolean;
-  currentUser: { id: string; displayName: string } | null;
+  currentUser: { id: string; displayName: string; email: string } | null;
   onOpenAuth: () => void;
 }
 

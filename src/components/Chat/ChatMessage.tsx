@@ -36,85 +36,102 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, x: isCurrentUser ? 20 : -20, scale: 0.9 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      transition={{ type: "spring", damping: 20, stiffness: 300 }}
       className={`mb-3 md:mb-4 ${isCurrentUser ? 'ml-auto' : 'mr-auto'} relative group flex gap-2 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
     >
       {!isCurrentUser && (
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-600`}>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1, type: "spring", damping: 15 }}
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg`}
+        >
           {userInitials}
-        </div>
+        </motion.div>
       )}
-      <div
-        className={`max-w-[85%] md:max-w-[80%] rounded-lg px-3 md:px-4 py-2 ${
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        className={`max-w-[85%] md:max-w-[80%] rounded-2xl px-3 md:px-4 py-2.5 shadow-md backdrop-blur-sm ${
           isCurrentUser
             ? darkMode
-              ? 'bg-blue-600'
-              : 'bg-blue-500'
+              ? 'bg-gradient-to-br from-blue-600 to-blue-700'
+              : 'bg-gradient-to-br from-blue-500 to-blue-600'
             : darkMode
-              ? 'bg-gray-700'
-              : 'bg-gray-100'
+              ? 'bg-gray-700/80'
+              : 'bg-white'
         }`}
       >
-        <div className="flex items-center justify-between gap-2 md:gap-3 mb-1 flex-wrap">
+        <div className="flex items-center justify-between gap-2 md:gap-3 mb-2 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className={`font-medium text-xs md:text-sm ${
+            <span className={`font-semibold text-xs md:text-sm ${
               isCurrentUser
                 ? 'text-white'
                 : darkMode
-                  ? 'text-gray-300'
-                  : 'text-gray-700'
+                  ? 'text-gray-200'
+                  : 'text-gray-800'
             }`}>
               {message.username}
             </span>
           </div>
           <div className="flex items-center gap-2">
             {message.isAdmin ? (
-              <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] md:text-xs font-bold ${
-                darkMode
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/50'
-                  : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md'
-              }`}>
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-bold ${
+                  darkMode
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/30'
+                    : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md'
+                }`}
+              >
                 <Shield className="w-2.5 h-2.5 md:w-3 md:h-3" />
                 ADMIN
-              </span>
+              </motion.span>
             ) : (
-              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] md:text-xs font-medium ${
-                darkMode
-                  ? 'bg-blue-900/40 text-blue-300'
-                  : 'bg-blue-100 text-blue-700'
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium ${
+                isCurrentUser
+                  ? 'bg-white/20 text-white'
+                  : darkMode
+                    ? 'bg-blue-900/40 text-blue-300'
+                    : 'bg-blue-100 text-blue-700'
               }`}>
                 Estudiante
               </span>
             )}
             {currentUserIsAdmin && (
-              <button
+              <motion.button
                 onClick={() => onDelete(message.id)}
-                className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
-                  darkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-500 hover:text-red-500'
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className={`opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 rounded-lg ${
+                  darkMode
+                    ? 'text-gray-400 hover:text-red-400 hover:bg-red-900/20'
+                    : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
                 }`}
                 title="Eliminar mensaje"
               >
                 <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
-        <p className={`text-xs md:text-sm break-words ${
-          isCurrentUser ? 'text-white' : darkMode ? 'text-gray-200' : 'text-gray-800'
+        <p className={`text-xs md:text-sm break-words leading-relaxed ${
+          isCurrentUser ? 'text-white' : darkMode ? 'text-gray-100' : 'text-gray-700'
         }`}>
           {message.text}
         </p>
-        <span className={`text-xs md:text-xs ${
+        <span className={`text-[10px] md:text-xs mt-1 inline-block ${
           isCurrentUser
             ? 'text-blue-100'
             : darkMode
-              ? 'text-gray-400'
-              : 'text-gray-500'
+              ? 'text-gray-500'
+              : 'text-gray-400'
         }`}>
           {timeAgo}
         </span>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };

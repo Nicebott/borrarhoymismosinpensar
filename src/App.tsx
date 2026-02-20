@@ -37,6 +37,7 @@ function App() {
     return {
       id: user.id,
       displayName: user.user_metadata?.display_name || user.email || 'Usuario',
+      email: user.email || '',
     };
   }, [user]);
 

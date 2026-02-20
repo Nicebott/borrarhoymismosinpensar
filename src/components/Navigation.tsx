@@ -8,7 +8,7 @@ interface NavigationProps {
   setIsMenuOpen: (isOpen: boolean) => void;
   darkMode: boolean;
   toggleDarkMode: () => void;
-  user: { id: string; displayName: string } | null;
+  user: { id: string; displayName: string; email: string } | null;
   showProfileDropdown: boolean;
   setShowProfileDropdown: (show: boolean) => void;
   setIsAuthModalOpen: (isOpen: boolean) => void;
@@ -106,6 +106,7 @@ const Navigation: React.FC<NavigationProps> = ({
                   darkMode={darkMode}
                   onClose={() => setShowProfileDropdown(false)}
                   displayName={user.displayName}
+                  userEmail={user.email}
                 />
               )}
             </div>

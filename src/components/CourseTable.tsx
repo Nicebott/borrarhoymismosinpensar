@@ -23,7 +23,7 @@ interface CourseTableProps {
   sections: Section[];
   onRateSection: (sectionId: string) => void;
   darkMode: boolean;
-  currentUser: { id: string; displayName: string } | null;
+  currentUser: { id: string; displayName: string; email: string } | null;
 }
 
 const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSection, darkMode, currentUser }) => {

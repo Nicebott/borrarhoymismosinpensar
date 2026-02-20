@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, X, LogIn } from 'lucide-react';
+import { MessageCircle, X, LogIn, Sparkles } from 'lucide-react';
 import { useSupabaseChat } from '../hooks/useSupabaseChat';
 import { useAuthContext } from '../contexts/AuthContext';
 import ChatMessages from './Chat/ChatMessages';
@@ -7,6 +7,7 @@ import ChatInput from './Chat/ChatInput';
 import ChatEntrance from './Chat/ChatEntrance';
 import { supabase } from '../supabase';
 import { checkIsAdmin, checkIsSuperAdmin } from '../services/adminService';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatProps {
   darkMode?: boolean;
@@ -95,98 +96,146 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
 
   return (
     <>
-      <button
+      <motion.button
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-4 right-4 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors z-[60] flex items-center md:p-3 p-2"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg z-50 flex items-center justify-center transition-colors"
       >
-        <MessageCircle className="md:w-6 md:h-6 w-5 h-5" />
+        <MessageCircle className="w-6 h-6 text-white" />
         {!isChatOpen && unreadCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full md:w-6 md:h-6 w-5 h-5 flex items-center justify-center">
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-md"
+          >
             {unreadCount}
-          </span>
+          </motion.span>
         )}
-      </button>
+      </motion.button>
 
-      {isChatOpen && (
-        <div className={`fixed inset-x-4 bottom-20 md:bottom-20 md:right-4 md:left-auto md:w-96 shadow-lg rounded-lg z-[60] ${
-          darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'
-        }`}>
-          <div className={`flex justify-between items-center p-3 md:p-4 border-b ${
-            darkMode ? 'border-gray-700' : 'border-gray-200'
-          }`}>
-            <h2 className={`text-base md:text-lg font-bold ${darkMode ? 'text-white' : ''}`}>
-              Chat en tiempo real
-            </h2>
-            <button 
-              onClick={() => setIsChatOpen(false)}
-              className={`${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              <X className="w-5 h-5 md:w-5 md:h-5" />
-            </button>
-          </div>
-
-          <div className="p-3 md:p-4">
-            {authLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-              </div>
-            ) : !user || !session ? (
-              <div className="space-y-6">
-                <div className="text-center">
-                  <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
-                    darkMode ? 'bg-gray-700' : 'bg-blue-50'
-                  }`}>
-                    <MessageCircle className={`w-8 h-8 ${
-                      darkMode ? 'text-blue-400' : 'text-blue-500'
-                    }`} />
-                  </div>
-                  <h3 className={`text-xl font-bold mb-2 ${
-                    darkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    Chat en Tiempo Real
-                  </h3>
-                  <p className={`text-xs md:text-sm ${
-                    darkMode ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    Inicia sesion para unirte a la conversacion
-                  </p>
-                </div>
-
-                <button
-                  onClick={handleOpenAuth}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors text-sm ${
-                    darkMode
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                  }`}
+      <AnimatePresence>
+        {isChatOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className={`fixed inset-x-4 bottom-20 md:bottom-20 md:right-4 md:left-auto md:w-96 shadow-2xl rounded-2xl z-[60] backdrop-blur-sm overflow-hidden ${
+              darkMode ? 'bg-gray-800/95 border border-gray-700/50' : 'bg-white/95 border border-gray-200'
+            }`}
+          >
+            <div className={`relative flex justify-between items-center p-3 md:p-4 border-b backdrop-blur-md ${
+              darkMode ? 'border-gray-700/50 bg-gray-800/80' : 'border-gray-200 bg-white/80'
+            }`}>
+              <div className="flex items-center gap-2">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <LogIn size={18} />
-                  <span>Iniciar Sesion</span>
-                </button>
+                  <Sparkles className={`w-5 h-5 ${darkMode ? 'text-blue-400' : 'text-blue-500'}`} />
+                </motion.div>
+                <h2 className={`text-base md:text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  Chat en tiempo real
+                </h2>
               </div>
-            ) : !hasEnteredChat ? (
-              <ChatEntrance darkMode={darkMode} onEnter={handleEnterChat} onClose={() => setIsChatOpen(false)} />
-            ) : (
-              <>
-                <ChatMessages
-                  messages={messages}
-                  darkMode={darkMode}
-                  currentUsername={displayName}
-                  onLoadMore={loadMoreMessages}
-                  loading={loading}
-                  isAdmin={isAdmin}
-                  onDeleteMessage={handleDeleteMessage}
-                />
-                <ChatInput
-                  onSendMessage={handleSendMessage}
-                  darkMode={darkMode}
-                  username={displayName}
-                />
-              </>
-            )}
-          </div>
-        </div>
-      )}
+              <motion.button
+                onClick={() => setIsChatOpen(false)}
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                className={`p-2 rounded-lg transition-colors ${
+                  darkMode ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <X className="w-5 h-5 md:w-5 md:h-5" />
+              </motion.button>
+            </div>
+
+            <div className="p-3 md:p-4">
+              {authLoading ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-8"
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="rounded-full h-8 w-8 border-b-2 border-t-2 border-blue-500"
+                  />
+                  <p className={`mt-3 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Cargando...
+                  </p>
+                </motion.div>
+              ) : !user || !session ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", damping: 15 }}
+                      className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                        darkMode ? 'bg-gradient-to-br from-gray-700 to-gray-600' : 'bg-gradient-to-br from-blue-50 to-blue-100'
+                      }`}
+                    >
+                      <MessageCircle className={`w-8 h-8 ${
+                        darkMode ? 'text-blue-400' : 'text-blue-500'
+                      }`} />
+                    </motion.div>
+                    <h3 className={`text-xl font-bold mb-2 ${
+                      darkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      Chat en Tiempo Real
+                    </h3>
+                    <p className={`text-xs md:text-sm ${
+                      darkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      Inicia sesion para unirte a la conversacion
+                    </p>
+                  </div>
+
+                  <motion.button
+                    onClick={handleOpenAuth}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all text-sm shadow-lg ${
+                      darkMode
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white'
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white'
+                    }`}
+                  >
+                    <LogIn size={18} />
+                    <span>Iniciar Sesion</span>
+                  </motion.button>
+                </motion.div>
+              ) : !hasEnteredChat ? (
+                <ChatEntrance darkMode={darkMode} onEnter={handleEnterChat} onClose={() => setIsChatOpen(false)} />
+              ) : (
+                <>
+                  <ChatMessages
+                    messages={messages}
+                    darkMode={darkMode}
+                    currentUsername={displayName}
+                    onLoadMore={loadMoreMessages}
+                    loading={loading}
+                    isAdmin={isAdmin}
+                    onDeleteMessage={handleDeleteMessage}
+                  />
+                  <ChatInput
+                    onSendMessage={handleSendMessage}
+                    darkMode={darkMode}
+                    username={displayName}
+                  />
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

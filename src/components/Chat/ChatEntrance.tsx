@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, ArrowRight } from 'lucide-react';
+import { MessageCircle, ArrowRight, Sparkles, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ChatEntranceProps {
@@ -11,45 +11,99 @@ interface ChatEntranceProps {
 
 const ChatEntrance: React.FC<ChatEntranceProps> = ({ darkMode, onEnter, onClose }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-2">
       <div className="text-center">
         <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
-            darkMode ? 'bg-gray-700' : 'bg-blue-50'
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", damping: 15, stiffness: 200 }}
+          className={`mx-auto w-20 h-20 rounded-2xl flex items-center justify-center mb-4 relative ${
+            darkMode
+              ? 'bg-gradient-to-br from-blue-600 to-blue-700'
+              : 'bg-gradient-to-br from-blue-500 to-blue-600'
           }`}
         >
-          <MessageCircle className={`w-8 h-8 ${
+          <MessageCircle className="w-10 h-10 text-white relative z-10" />
+          <motion.div
+            className="absolute inset-0 rounded-2xl bg-white opacity-20"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        </motion.div>
+        <motion.h3
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className={`text-xl font-bold mb-2 ${
+            darkMode ? 'text-white' : 'text-gray-900'
+          }`}
+        >
+          Chat en Tiempo Real
+        </motion.h3>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className={`text-xs md:text-sm ${
+            darkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}
+        >
+          Unete a la conversacion con otros estudiantes
+        </motion.p>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="grid grid-cols-2 gap-3"
+      >
+        <div className={`p-3 rounded-xl text-center ${
+          darkMode ? 'bg-gray-700/50' : 'bg-gray-50'
+        }`}>
+          <Users className={`w-5 h-5 mx-auto mb-1 ${
             darkMode ? 'text-blue-400' : 'text-blue-500'
           }`} />
-        </motion.div>
-        <h3 className={`text-xl font-bold mb-2 ${
-          darkMode ? 'text-white' : 'text-gray-900'
+          <p className={`text-xs font-medium ${
+            darkMode ? 'text-gray-300' : 'text-gray-700'
+          }`}>
+            Comparte ideas
+          </p>
+        </div>
+        <div className={`p-3 rounded-xl text-center ${
+          darkMode ? 'bg-gray-700/50' : 'bg-gray-50'
         }`}>
-          Chat en Tiempo Real
-        </h3>
-        <p className={`text-xs md:text-sm ${
-          darkMode ? 'text-gray-400' : 'text-gray-600'
-        }`}>
-          Unete a la conversacion con otros estudiantes
-        </p>
-      </div>
+          <Sparkles className={`w-5 h-5 mx-auto mb-1 ${
+            darkMode ? 'text-blue-400' : 'text-blue-500'
+          }`} />
+          <p className={`text-xs font-medium ${
+            darkMode ? 'text-gray-300' : 'text-gray-700'
+          }`}>
+            Conoce gente
+          </p>
+        </div>
+      </motion.div>
 
       <motion.button
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
+        transition={{ type: "spring", damping: 20, delay: 0.4 }}
         onClick={onEnter}
-        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors text-sm ${
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className={`w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-semibold transition-all text-sm shadow-lg relative overflow-hidden ${
           darkMode
-            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-            : 'bg-blue-500 hover:bg-blue-600 text-white'
+            ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white'
+            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white'
         }`}
       >
         <span>Ingresar al chat</span>
         <ArrowRight className="w-5 h-5" />
+        <motion.div
+          className="absolute inset-0 bg-white opacity-0 hover:opacity-10"
+          animate={{ x: ['-100%', '100%'] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        />
       </motion.button>
 
       <motion.div

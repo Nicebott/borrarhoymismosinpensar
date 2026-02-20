@@ -23,7 +23,7 @@ interface ProfessorDetailsModalProps {
   darkMode: boolean;
   professorId: string;
   professorName: string;
-  currentUser?: { id: string; displayName: string } | null;
+  currentUser?: { id: string; displayName: string; email: string } | null;
 }
 
 const ProfessorDetailsModal: React.FC<ProfessorDetailsModalProps> = ({
