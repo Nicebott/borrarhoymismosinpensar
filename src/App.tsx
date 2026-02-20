@@ -14,6 +14,7 @@ import SemipresencialPage from './pages/SemipresencialPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import ProfilePage from './pages/ProfilePage';
+import CommunityRulesPage from './pages/CommunityRulesPage';
 import { useAuthContext } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import { checkIsAdmin, checkIsSuperAdmin } from './services/adminService';
@@ -146,6 +147,10 @@ function App() {
               path="/perfil"
               element={<ProfilePage darkMode={darkMode} />}
             />
+            <Route
+              path="/community-rules"
+              element={<CommunityRulesPage darkMode={darkMode} />}
+            />
           </Routes>
         </main>
 
@@ -160,7 +165,7 @@ function App() {
                   Desarrollado con ❤️ para la comunidad estudiantil
                 </p>
               </div>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4 justify-center md:justify-end">
                 <FooterLink
                   to="/terms"
                   darkMode={darkMode}
@@ -172,6 +177,12 @@ function App() {
                   darkMode={darkMode}
                 >
                   Politica de Privacidad
+                </FooterLink>
+                <FooterLink
+                  to="/community-rules"
+                  darkMode={darkMode}
+                >
+                  Normas de Comunidad
                 </FooterLink>
               </div>
             </div>

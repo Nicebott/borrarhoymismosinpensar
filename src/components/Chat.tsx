@@ -165,7 +165,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
                 </button>
               </div>
             ) : !hasEnteredChat ? (
-              <ChatEntrance darkMode={darkMode} onEnter={handleEnterChat} />
+              <ChatEntrance darkMode={darkMode} onEnter={handleEnterChat} onClose={() => setIsChatOpen(false)} />
             ) : (
               <>
                 <ChatMessages
