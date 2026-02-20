@@ -45,8 +45,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ darkMode, onClose }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
       onSubmit={handleSubmit}
-      className="space-y-4"
+      className="space-y-5"
     >
       <AuthInput
         icon={User}
@@ -78,20 +79,31 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ darkMode, onClose }) => {
         required
       />
 
-      <button
+      <motion.button
         type="submit"
         disabled={loading}
-        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+        whileHover={{ scale: loading ? 1 : 1.02 }}
+        whileTap={{ scale: loading ? 1 : 0.98 }}
+        className={`w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 ${
           loading
             ? 'bg-gray-400 cursor-not-allowed'
             : darkMode
-              ? 'bg-blue-600 hover:bg-blue-700 text-white'
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
+              ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/50'
+              : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-blue-500/50'
         }`}
       >
-        <UserPlus size={18} />
-        {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
-      </button>
+        {loading ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span>Creando cuenta...</span>
+          </>
+        ) : (
+          <>
+            <UserPlus size={20} />
+            <span>Crear Cuenta</span>
+          </>
+        )}
+      </motion.button>
     </motion.form>
   );
 };
