@@ -68,6 +68,7 @@ const Navigation: React.FC<NavigationProps> = ({
   return (
     <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md sticky top-0 z-50`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center relative">
+
         {/* Logo */}
         <Link
           to="/"
@@ -102,7 +103,8 @@ const Navigation: React.FC<NavigationProps> = ({
               <span className="hidden sm:inline">Iniciar Sesion</span>
             </button>
           ) : (
-            <div className="relative min-w-0" ref={dropdownRef}>
+            /* El div usa static en móvil para que el dropdown use fixed relativo al viewport */
+            <div className="static sm:relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm ${
@@ -181,6 +183,7 @@ const Navigation: React.FC<NavigationProps> = ({
             )}
           </div>
         </nav>
+
       </div>
     </header>
   );
