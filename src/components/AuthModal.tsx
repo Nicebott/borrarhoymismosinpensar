@@ -66,7 +66,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, darkMode }) => {
               darkMode ? 'text-white' : 'text-gray-900'
             }`}
           >
-            Bienvenido a Misemestre
+            Bienvenido a MiSemestre
           </motion.h2>
 
           <motion.p

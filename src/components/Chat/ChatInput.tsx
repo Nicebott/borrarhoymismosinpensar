@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense, useRef, useEffect } from 'react';
 import { Smile, Send, Sparkles } from 'lucide-react';
-import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { EmojiClickData } from 'emoji-picker-react';
+
+const EmojiPicker = lazy(() => import('emoji-picker-react'));
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -13,6 +15,26 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, darkMode, username
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('button[aria-label="emoji-button"]')) {
+          setShowEmojiPicker(false);
+        }
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +47,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, darkMode, username
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setMessage((prev) => prev + emojiData.emoji);
-    setShowEmojiPicker(false);
   };
 
   return (
@@ -54,6 +75,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, darkMode, username
         <motion.button
           type="button"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          aria-label="emoji-button"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           className={`px-2.5 md:px-3 py-2 flex-shrink-0 transition-colors ${
@@ -92,17 +114,31 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, darkMode, username
       <AnimatePresence>
         {showEmojiPicker && (
           <motion.div
+            ref={emojiPickerRef}
             initial={{ opacity: 0, scale: 0.9, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 10 }}
             className="absolute right-0 bottom-full mb-2 z-10 scale-75 md:scale-100 origin-bottom-right"
           >
-            <EmojiPicker
-              onEmojiClick={handleEmojiClick}
-              theme={darkMode ? 'dark' : 'light'}
-              width={280}
-              height={350}
-            />
+            <Suspense fallback={
+              <div className={`w-[280px] h-[350px] flex items-center justify-center rounded-lg ${
+                darkMode ? 'bg-gray-800' : 'bg-white'
+              }`}>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            }>
+              <EmojiPicker
+                onEmojiClick={handleEmojiClick}
+                theme={darkMode ? 'dark' : 'light'}
+                width={280}
+                height={350}
+                lazyLoadEmojis={true}
+                searchPlaceHolder="Buscar emoji..."
+                previewConfig={{
+                  showPreview: false
+                }}
+              />
+            </Suspense>
           </motion.div>
         )}
       </AnimatePresence>
