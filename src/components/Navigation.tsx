@@ -1,6 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { GraduationCap, Menu, X, Moon, Sun, LogIn, CircleUser as UserCircle, HelpCircle, MessageSquare, Shield } from 'lucide-react';
+import {
+  GraduationCap,
+  Menu,
+  X,
+  Moon,
+  Sun,
+  LogIn,
+  CircleUser as UserCircle,
+  HelpCircle,
+  MessageSquare,
+  Shield,
+} from 'lucide-react';
 import ProfileDropdown from './ProfileDropdown';
 
 interface NavigationProps {
@@ -46,11 +57,9 @@ const Navigation: React.FC<NavigationProps> = ({
         setShowProfileDropdown(false);
       }
     };
-
     if (showProfileDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -59,6 +68,7 @@ const Navigation: React.FC<NavigationProps> = ({
   return (
     <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md sticky top-0 z-50`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center relative">
+        {/* Logo */}
         <Link
           to="/"
           onClick={handleLinkClick}
@@ -68,13 +78,16 @@ const Navigation: React.FC<NavigationProps> = ({
             size={40}
             className={`${darkMode ? 'text-blue-400' : 'text-blue-600'} mr-3 group-hover:scale-110 transition-transform duration-200`}
           />
-          <h1 className={`text-lg sm:text-xl md:text-2xl font-bold ${
-            darkMode ? 'text-white' : 'text-gray-800'
-          } group-hover:text-blue-500 transition-colors duration-200`}>
+          <h1
+            className={`text-lg sm:text-xl md:text-2xl font-bold ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            } group-hover:text-blue-500 transition-colors duration-200`}
+          >
             MiSemestre
           </h1>
         </Link>
 
+        {/* Right side controls */}
         <div className="flex items-center gap-2 md:gap-4">
           {!user ? (
             <button
@@ -89,7 +102,7 @@ const Navigation: React.FC<NavigationProps> = ({
               <span className="hidden sm:inline">Iniciar Sesion</span>
             </button>
           ) : (
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative min-w-0" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm ${
@@ -101,6 +114,7 @@ const Navigation: React.FC<NavigationProps> = ({
                 <UserCircle size={18} />
                 <span className="hidden sm:inline">{user.displayName || 'Usuario'}</span>
               </button>
+
               {showProfileDropdown && (
                 <ProfileDropdown
                   darkMode={darkMode}
@@ -112,6 +126,7 @@ const Navigation: React.FC<NavigationProps> = ({
             </div>
           )}
 
+          {/* Dark mode toggle */}
           <button
             onClick={toggleDarkMode}
             className={`p-1.5 rounded-full ${
@@ -122,10 +137,8 @@ const Navigation: React.FC<NavigationProps> = ({
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-1.5"
-          >
+          {/* Mobile menu button */}
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-1.5">
             {isMenuOpen ? (
               <X size={20} className={darkMode ? 'text-white' : ''} />
             ) : (
@@ -134,64 +147,34 @@ const Navigation: React.FC<NavigationProps> = ({
           </button>
         </div>
 
-        <nav className={`${
-          isMenuOpen
-            ? 'fixed top-16 left-0 right-0 bottom-0 overflow-y-auto'
-            : 'hidden'
-        } md:block md:static md:w-auto md:shadow-none md:mt-0 md:overflow-visible ${
-          darkMode ? 'bg-gray-800' : 'bg-white'
-        } md:bg-transparent z-40`}
+        {/* Nav links */}
+        <nav
+          className={`${
+            isMenuOpen ? 'fixed top-16 left-0 right-0 bottom-0 overflow-y-auto' : 'hidden'
+          } md:block md:static md:w-auto md:shadow-none md:mt-0 md:overflow-visible ${
+            darkMode ? 'bg-gray-800' : 'bg-white'
+          } md:bg-transparent z-40`}
         >
           <div className="flex flex-col md:flex-row md:items-center gap-2 p-4 md:p-0 min-h-full md:min-h-0">
-            <NavLink
-              to="/"
-              isActive={isActive('/')}
-              darkMode={darkMode}
-              onClick={handleLinkClick}
-            >
+            <NavLink to="/" isActive={isActive('/')} darkMode={darkMode} onClick={handleLinkClick}>
               Inicio
             </NavLink>
-            <NavLink
-              to="/virtual"
-              isActive={isActive('/virtual')}
-              darkMode={darkMode}
-              onClick={handleLinkClick}
-            >
+            <NavLink to="/virtual" isActive={isActive('/virtual')} darkMode={darkMode} onClick={handleLinkClick}>
               Virtual
             </NavLink>
-            <NavLink
-              to="/semipresencial"
-              isActive={isActive('/semipresencial')}
-              darkMode={darkMode}
-              onClick={handleLinkClick}
-            >
+            <NavLink to="/semipresencial" isActive={isActive('/semipresencial')} darkMode={darkMode} onClick={handleLinkClick}>
               SemiPresencial
             </NavLink>
-            <NavLink
-              to="/foro"
-              isActive={isActive('/foro')}
-              darkMode={darkMode}
-              onClick={handleLinkClick}
-            >
+            <NavLink to="/foro" isActive={isActive('/foro')} darkMode={darkMode} onClick={handleLinkClick}>
               <MessageSquare size={16} className="mr-1.5" />
               Foro
             </NavLink>
-            <NavLink
-              to="/faq"
-              isActive={isActive('/faq')}
-              darkMode={darkMode}
-              onClick={handleLinkClick}
-            >
+            <NavLink to="/faq" isActive={isActive('/faq')} darkMode={darkMode} onClick={handleLinkClick}>
               <HelpCircle size={16} className="mr-1.5" />
               FAQ
             </NavLink>
             {isUserAdmin && (
-              <NavLink
-                to="/admin"
-                isActive={isActive('/admin')}
-                darkMode={darkMode}
-                onClick={handleLinkClick}
-              >
+              <NavLink to="/admin" isActive={isActive('/admin')} darkMode={darkMode} onClick={handleLinkClick}>
                 <Shield size={16} className="mr-1.5" />
                 Admin
               </NavLink>
@@ -211,13 +194,7 @@ interface NavLinkProps {
   children: React.ReactNode;
 }
 
-const NavLink: React.FC<NavLinkProps> = ({
-  to,
-  isActive,
-  darkMode,
-  onClick,
-  children
-}) => (
+const NavLink: React.FC<NavLinkProps> = ({ to, isActive, darkMode, onClick, children }) => (
   <Link
     to={to}
     onClick={onClick}
@@ -227,8 +204,8 @@ const NavLink: React.FC<NavLinkProps> = ({
           ? 'bg-gray-700 text-white'
           : 'bg-gray-100 text-blue-700'
         : darkMode
-          ? 'text-gray-300 hover:text-white'
-          : 'text-gray-600 hover:text-blue-500'
+        ? 'text-gray-300 hover:text-white'
+        : 'text-gray-600 hover:text-blue-500'
     }`}
   >
     {children}
