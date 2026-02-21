@@ -41,7 +41,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ darkMode, onClose, di
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -10 }}
       transition={{ duration: 0.15 }}
-      className={`absolute right-0 mt-3 w-72 rounded-xl shadow-xl py-2 z-50 border ${
+      className={`absolute right-0 mt-3 w-72 max-w-[calc(100vw-2rem)] sm:max-w-72 rounded-xl shadow-xl py-2 z-50 border ${
         darkMode
           ? 'bg-gray-800 border-gray-700'
           : 'bg-white border-gray-100'
