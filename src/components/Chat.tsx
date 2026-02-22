@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, X, LogIn, Sparkles } from 'lucide-react';
+import { MessageCircle, X, LogIn } from 'lucide-react';
 import { useSupabaseChat } from '../hooks/useSupabaseChat';
 import { useAuthContext } from '../contexts/AuthContext';
 import ChatMessages from './Chat/ChatMessages';
@@ -129,12 +129,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
               darkMode ? 'border-gray-700/50 bg-gray-800/80' : 'border-gray-200 bg-white/80'
             }`}>
               <div className="flex items-center gap-2">
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <Sparkles className={`w-5 h-5 ${darkMode ? 'text-blue-400' : 'text-blue-500'}`} />
-                </motion.div>
+                <MessageCircle className={`w-5 h-5 ${darkMode ? 'text-blue-400' : 'text-blue-500'}`} />
                 <h2 className={`text-base md:text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                   Chat en tiempo real
                 </h2>

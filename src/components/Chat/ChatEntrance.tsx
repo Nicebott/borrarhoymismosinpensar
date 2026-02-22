@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, ArrowRight, Sparkles, Users } from 'lucide-react';
+import { MessageCircle, ArrowRight, Globe, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ChatEntranceProps {
@@ -73,7 +73,7 @@ const ChatEntrance: React.FC<ChatEntranceProps> = ({ darkMode, onEnter, onClose 
         <div className={`p-3 rounded-xl text-center ${
           darkMode ? 'bg-gray-700/50' : 'bg-gray-50'
         }`}>
-          <Sparkles className={`w-5 h-5 mx-auto mb-1 ${
+          <Globe className={`w-5 h-5 mx-auto mb-1 ${
             darkMode ? 'text-blue-400' : 'text-blue-500'
           }`} />
           <p className={`text-xs font-medium ${

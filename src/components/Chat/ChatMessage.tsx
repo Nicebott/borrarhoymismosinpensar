@@ -63,8 +63,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               : 'bg-white'
         }`}
       >
-        <div className="flex items-center justify-between gap-2 md:gap-3 mb-2 flex-wrap">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+          <div className="flex items-center gap-1.5">
             <span className={`font-semibold text-xs md:text-sm ${
               isCurrentUser
                 ? 'text-white'
@@ -74,8 +74,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             }`}>
               {message.username}
             </span>
-          </div>
-          <div className="flex items-center gap-2">
             {message.isAdmin ? (
               <motion.span
                 initial={{ scale: 0 }}
@@ -100,6 +98,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 Estudiante
               </span>
             )}
+          </div>
+          <div className="flex items-center gap-2">
             {currentUserIsAdmin && (
               <motion.button
                 onClick={() => onDelete(message.id)}

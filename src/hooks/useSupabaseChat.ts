@@ -3,6 +3,7 @@ import { supabase } from '../supabase';
 import { Message } from '../types';
 
 const MESSAGES_PER_PAGE = 50;
+const LAST_SEEN_KEY = 'chat_last_seen_timestamp';
 
 export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: string, isAdmin: boolean = false) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -37,6 +38,10 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
 
       fetchMessages();
 
+      // Mark chat as seen when opened
+      localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
+      setUnreadCount(0);
+
       // Realtime subscription
       const channel = supabase
         .channel('chat-messages')
@@ -55,6 +60,8 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
                 isAdmin: m.is_admin,
               },
             ]);
+            // Update last seen timestamp when viewing new messages
+            localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
           }
         )
         .on(
@@ -68,16 +75,20 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
         .subscribe();
 
       return () => {
+        // Update last seen timestamp when closing chat
+        localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
         supabase.removeChannel(channel);
       };
     } else {
-      // When chat is closed, track unread count
+      // When chat is closed, track unread count based on last seen timestamp
       const fetchUnread = async () => {
-        const fiveMinAgo = new Date(Date.now() - 300000).toISOString();
+        const lastSeen = localStorage.getItem(LAST_SEEN_KEY);
+        const cutoffTime = lastSeen || new Date(Date.now() - 300000).toISOString();
+
         const { count } = await supabase
           .from('chat_messages')
           .select('*', { count: 'exact', head: true })
-          .gte('created_at', fiveMinAgo);
+          .gt('created_at', cutoffTime);
 
         setUnreadCount(count ?? 0);
       };
