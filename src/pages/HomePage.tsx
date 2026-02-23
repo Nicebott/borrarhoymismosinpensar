@@ -4,6 +4,7 @@ import SearchBar from '../components/SearchBar';
 import CourseTable from '../components/CourseTable';
 import Pagination from '../components/Pagination';
 import LoadingSpinner from '../components/LoadingSpinner';
+import SEO from '../components/SEO';
 import { Course, Section } from '../types';
 import { fetchCourseData } from '../api/courseData';
 import { normalizeText } from '../utils/stringUtils';
@@ -139,12 +140,18 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
   }, [searchParams, setSearchParams]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="flex flex-col items-center"
-    >
+    <>
+      <SEO
+        title="MiSemestre - Programacion Docente UASD 2025-10 | Horarios y Asignaturas"
+        description="Consulta la programacion docente UASD 2025-10. Busca asignaturas, horarios, profesores y NRC por campus. Modalidades presencial, virtual y semipresencial disponibles."
+        keywords="programacion docente uasd, horarios uasd 2025-10, asignaturas uasd, nrc uasd, profesores uasd, universidad autonoma santo domingo, inscripciones uasd, calendario academico"
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="flex flex-col items-center"
+      >
       <div className="w-full max-w-4xl text-center mb-8">
         <motion.div
           initial={{ scale: 0.9 }}
@@ -220,7 +227,8 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
           </p>
         </motion.div>
       )}
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 
