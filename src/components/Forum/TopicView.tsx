@@ -2,12 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Topic, Message } from '../../types/forum';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Send, ArrowLeft, User, Trash2 } from 'lucide-react';
+import { Send, ArrowLeft, User, Trash2, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../supabase';
 import { deleteTopic, deleteMessage } from '../../services/forumService';
-import { getCurrentUserAdminStatus } from '../../services/adminService';
+import { useAdminContext } from '../../contexts/AdminContext';
 import toast from 'react-hot-toast';
+import LoadingSkeleton from '../LoadingSkeleton';
 
 interface TopicViewProps {
   topic: Topic;
@@ -16,6 +17,7 @@ interface TopicViewProps {
   onSendMessage: (content: string) => void;
   onDeleteMessage: (messageId: string) => void;
   darkMode: boolean;
+  loading?: boolean;
 }
 
 const TopicView: React.FC<TopicViewProps> = ({
@@ -24,24 +26,27 @@ const TopicView: React.FC<TopicViewProps> = ({
   onBack,
   onSendMessage,
   onDeleteMessage,
-  darkMode
+  darkMode,
+  loading = false
 }) => {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, isSuperAdmin } = useAdminContext();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const previousMessageCountRef = useRef(0);
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const isUserAdmin = isAdmin || isSuperAdmin;
 
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setCurrentUserId(user.id);
-        const adminStatus = await getCurrentUserAdminStatus();
-        setIsAdmin(adminStatus);
       }
     };
     init();
     window.scrollTo(0, 0);
+    previousMessageCountRef.current = 0;
   }, [topic.id]);
 
   const scrollToBottom = () => {
@@ -49,15 +54,20 @@ const TopicView: React.FC<TopicViewProps> = ({
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
+    if (shouldScroll && messages.length > previousMessageCountRef.current) {
       const timer = setTimeout(scrollToBottom, 100);
+      setShouldScroll(false);
+      previousMessageCountRef.current = messages.length;
       return () => clearTimeout(timer);
+    } else if (messages.length > 0 && previousMessageCountRef.current === 0) {
+      previousMessageCountRef.current = messages.length;
     }
-  }, [messages]);
+  }, [messages, shouldScroll]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim()) {
+      setShouldScroll(true);
       onSendMessage(newMessage);
       setNewMessage('');
     }
@@ -118,7 +128,7 @@ const TopicView: React.FC<TopicViewProps> = ({
           </button>
         )}
 
-        {isAdmin && currentUserId !== topic.creador && (
+        {isUserAdmin && currentUserId !== topic.creador && (
           <button
             onClick={handleDelete}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
@@ -143,11 +153,21 @@ const TopicView: React.FC<TopicViewProps> = ({
           {topic.descripcion}
         </p>
         <div className={`flex items-center gap-3 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
-            darkMode ? 'bg-gray-700' : 'bg-gray-100'
-          }`}>
-            <User className="w-4 h-4" />
+          <div className={`flex items-center gap-2`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br from-blue-500 to-blue-600`}>
+              {topic.creadorNombre.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+            </div>
             <span className="font-medium">{topic.creadorNombre}</span>
+            {topic.isAdmin && (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                darkMode
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/30'
+                  : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md'
+              }`}>
+                <Shield className="w-3 h-3" />
+                ADMIN
+              </span>
+            )}
           </div>
           <span>{'*'}</span>
           <span>
@@ -160,7 +180,9 @@ const TopicView: React.FC<TopicViewProps> = ({
         darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
       } shadow-lg overflow-hidden`}>
         <div className="h-[500px] overflow-y-auto p-6">
-          {messages.length === 0 ? (
+          {loading ? (
+            <LoadingSkeleton darkMode={darkMode} type="message" count={5} />
+          ) : messages.length === 0 ? (
             <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               No hay respuestas aun. Se el primero en responder!
             </div>
@@ -179,10 +201,8 @@ const TopicView: React.FC<TopicViewProps> = ({
                     } rounded-lg p-4`}
                   >
                     <div className="flex items-start gap-4 group">
-                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                        darkMode ? 'bg-gray-600' : 'bg-gray-200'
-                      }`}>
-                        <User className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white bg-gradient-to-br from-blue-500 to-blue-600`}>
+                        {message.autorNombre.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
@@ -190,15 +210,25 @@ const TopicView: React.FC<TopicViewProps> = ({
                             <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
                               {message.autorNombre}
                             </span>
-                            {(isAdmin || message.autor === currentUserId) && (
+                            {message.isAdmin && (
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                                darkMode
+                                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/30'
+                                  : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md'
+                              }`}>
+                                <Shield className="w-3 h-3" />
+                                ADMIN
+                              </span>
+                            )}
+                            {(isUserAdmin || message.autor === currentUserId) && (
                               <button
                                 onClick={() => handleDeleteMessage(message.id)}
                                 className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded ${
-                                  darkMode 
-                                    ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600' 
+                                  darkMode
+                                    ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600'
                                     : 'text-gray-500 hover:text-red-500 hover:bg-gray-200'
                                 }`}
-                                title={isAdmin && message.autor !== currentUserId ? "Eliminar mensaje (Admin)" : "Eliminar mensaje"}
+                                title={isUserAdmin && message.autor !== currentUserId ? "Eliminar mensaje (Admin)" : "Eliminar mensaje"}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>

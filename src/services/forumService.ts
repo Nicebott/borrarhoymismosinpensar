@@ -19,6 +19,7 @@ export const getTopics = async (): Promise<Topic[]> => {
       creadorNombre: row.creador_nombre,
       creadoEn: row.created_at,
       mensajesCount: row.mensajes_count,
+      isAdmin: row.is_admin || false,
     }));
   } catch (error) {
     console.error('Error fetching topics:', error);
@@ -42,6 +43,7 @@ export const getTopicMessages = async (topicId: string): Promise<Message[]> => {
       autor: row.autor,
       autorNombre: row.autor_nombre,
       creadoEn: row.created_at,
+      isAdmin: row.is_admin || false,
     }));
   } catch (error) {
     console.error('Error fetching messages:', error);
@@ -56,6 +58,7 @@ export const createTopic = async (
   displayName: string
 ): Promise<string | null> => {
   try {
+    const isAdmin = await checkIsAdmin(userId);
     const { data, error } = await supabase
       .from('forum_topics')
       .insert({
@@ -64,6 +67,7 @@ export const createTopic = async (
         creador: userId,
         creador_nombre: displayName,
         mensajes_count: 0,
+        is_admin: isAdmin,
       })
       .select('id')
       .single();
@@ -83,6 +87,7 @@ export const createMessage = async (
   displayName: string
 ): Promise<string | null> => {
   try {
+    const isAdmin = await checkIsAdmin(userId);
     const { data, error } = await supabase
       .from('forum_messages')
       .insert({
@@ -90,6 +95,7 @@ export const createMessage = async (
         contenido: content,
         autor: userId,
         autor_nombre: displayName,
+        is_admin: isAdmin,
       })
       .select('id')
       .single();

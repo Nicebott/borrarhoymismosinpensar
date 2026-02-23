@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { User, Trash2 } from 'lucide-react';
+import { User, Trash2, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 import RatingStars from './RatingStars';
-import { getCurrentUserAdminStatus, getCurrentUserSuperAdminStatus, deleteReview } from '../../services/adminService';
+import { useAdminContext } from '../../contexts/AdminContext';
+import { deleteReview } from '../../services/adminService';
 import toast from 'react-hot-toast';
 
 interface ReviewCardProps {
@@ -18,24 +19,17 @@ interface ReviewCardProps {
     fairness: number;
     punctuality: number;
     wouldTakeAgain: number;
+    userId?: string;
+    isAdmin?: boolean;
   };
   darkMode: boolean;
   onDelete?: () => void;
 }
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ review, darkMode, onDelete }) => {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, isSuperAdmin } = useAdminContext();
   const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    checkAdminStatus();
-  }, []);
-
-  const checkAdminStatus = async () => {
-    const adminStatus = await getCurrentUserAdminStatus();
-    const superAdminStatus = await getCurrentUserSuperAdminStatus();
-    setIsAdmin(adminStatus || superAdminStatus);
-  };
+  const isCurrentUserAdmin = isAdmin || isSuperAdmin;
 
   const handleDelete = async () => {
     if (!window.confirm('Estas seguro de que quieres eliminar esta resena?')) {
@@ -66,22 +60,30 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, darkMode, onDelete }) =
       } shadow-lg transition-colors duration-200`}
     >
       <div className="flex items-start gap-4">
-        <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
-          darkMode ? 'bg-gray-700' : 'bg-gray-100'
-        }`}>
-          <User className={`w-6 h-6 ${
-            darkMode ? 'text-gray-300' : 'text-gray-600'
-          }`} />
+        <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-white bg-gradient-to-br from-blue-500 to-blue-600`}>
+          {review.userName.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h4 className={`font-semibold ${
-                darkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {review.userName}
-              </h4>
+              <div className="flex items-center gap-2">
+                <h4 className={`font-semibold ${
+                  darkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {review.userName}
+                </h4>
+                {review.isAdmin && (
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                    darkMode
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/30'
+                      : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md'
+                  }`}>
+                    <Shield className="w-3 h-3" />
+                    ADMIN
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2 mt-1">
                 <RatingStars
                   rating={review.rating}
@@ -98,7 +100,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, darkMode, onDelete }) =
                 </span>
               </div>
             </div>
-            {isAdmin && (
+            {isCurrentUserAdmin && (
               <button
                 onClick={handleDelete}
                 disabled={deleting}

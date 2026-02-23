@@ -4,8 +4,9 @@ export interface Topic {
   descripcion: string;
   creador: string;
   creadorNombre: string;
-  creadoEn: string; // ISO timestamp string from Supabase
+  creadoEn: string;
   mensajesCount?: number;
+  isAdmin?: boolean;
 }
 
 export interface Message {
@@ -13,5 +14,6 @@ export interface Message {
   contenido: string;
   autor: string;
   autorNombre: string;
-  creadoEn: string; // ISO timestamp string from Supabase
+  creadoEn: string;
+  isAdmin?: boolean;
 }

@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import ReviewModal from './ReviewModal';
 import ReviewCard from './Reviews/ReviewCard';
 import ReviewStats from './Reviews/ReviewStats';
+import LoadingSkeleton from './LoadingSkeleton';
 
 interface Review {
   id: string;
@@ -15,6 +16,8 @@ interface Review {
   fairness: number;
   punctuality: number;
   wouldTakeAgain: number;
+  userId?: string;
+  isAdmin?: boolean;
 }
 
 interface ProfessorDetailsModalProps {
@@ -65,6 +68,8 @@ const ProfessorDetailsModal: React.FC<ProfessorDetailsModalProps> = ({
         fairness: row.fairness,
         punctuality: row.punctuality,
         wouldTakeAgain: row.would_take_again,
+        userId: row.user_id,
+        isAdmin: row.is_admin || false,
       }));
 
       setReviews(reviewsData);
@@ -162,9 +167,7 @@ const ProfessorDetailsModal: React.FC<ProfessorDetailsModalProps> = ({
 
             <div className="md:col-span-2">
               {loading ? (
-                <div className={`text-center py-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Cargando resenas...
-                </div>
+                <LoadingSkeleton darkMode={darkMode} type="review" count={3} />
               ) : reviews.length > 0 ? (
                 <div className="space-y-6">
                   {reviews.map((review) => (

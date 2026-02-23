@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../supabase';
+import { checkIsAdmin, checkIsSuperAdmin } from '../services/adminService';
 import toast from 'react-hot-toast';
 import ReviewForm from './Reviews/ReviewForm';
 
@@ -38,6 +39,11 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     setLoading(true);
 
     try {
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        checkIsAdmin(userId),
+        checkIsSuperAdmin(userId)
+      ]);
+
       const { error } = await supabase.from('reviews').insert({
         professor_id: professorId,
         user_id: userId,
@@ -48,6 +54,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         punctuality: review.punctuality,
         would_take_again: review.wouldTakeAgain,
         comment: review.comment,
+        is_admin: isAdmin || isSuperAdmin,
       });
       if (error) throw error;
       toast.success('Resena enviada exitosamente!');

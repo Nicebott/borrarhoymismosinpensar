@@ -19,6 +19,7 @@ const Forum: React.FC<ForumProps> = ({ darkMode, setIsAuthModalOpen }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showNewTopicModal, setShowNewTopicModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ id: string; displayName: string } | null>(null);
 
   useEffect(() => {
@@ -60,8 +61,11 @@ const Forum: React.FC<ForumProps> = ({ darkMode, setIsAuthModalOpen }) => {
     const topic = topics.find(t => t.id === topicId);
     if (topic) {
       setSelectedTopic(topic);
+      setMessages([]);
+      setMessagesLoading(true);
       const fetchedMessages = await getTopicMessages(topicId);
       setMessages(fetchedMessages);
+      setMessagesLoading(false);
     }
   };
 
@@ -146,6 +150,7 @@ const Forum: React.FC<ForumProps> = ({ darkMode, setIsAuthModalOpen }) => {
           onSendMessage={handleSendMessage}
           onDeleteMessage={handleDeleteMessage}
           darkMode={darkMode}
+          loading={messagesLoading}
         />
       ) : (
         <ForumList
