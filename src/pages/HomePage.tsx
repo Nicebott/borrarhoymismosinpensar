@@ -84,11 +84,17 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
     setSearchParams(params);
   }, [selectedModality, setSearchParams]);
 
+  const courseMap = useMemo(() => {
+    const map = new Map<string, Course>();
+    allCourses.forEach(course => map.set(course.id, course));
+    return map;
+  }, [allCourses]);
+
   const filteredSections = useMemo(() => {
     const normalizedQuery = normalizeText(searchQuery);
 
     return allSections.filter(section => {
-      const course = allCourses.find(c => c.id === section.courseId);
+      const course = courseMap.get(section.courseId);
 
       const matchesSearch = !normalizedQuery || [
         normalizeText(section.professor),
@@ -110,7 +116,7 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
 
       return matchesSearch && matchesCampus && matchesModality;
     });
-  }, [allSections, allCourses, searchQuery, selectedCampus, selectedModality]);
+  }, [allSections, courseMap, searchQuery, selectedCampus, selectedModality]);
 
   const totalPages = Math.max(1, Math.ceil(filteredSections.length / itemsPerPage));
 
