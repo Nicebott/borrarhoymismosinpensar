@@ -4,6 +4,7 @@ import SearchBar from '../components/SearchBar';
 import CourseTable from '../components/CourseTable';
 import Pagination from '../components/Pagination';
 import LoadingSpinner from '../components/LoadingSpinner';
+import SkeletonCard from '../components/SkeletonCard';
 import SEO from '../components/SEO';
 import { Course, Section } from '../types';
 import { fetchCourseData } from '../api/courseData';
@@ -179,7 +180,11 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
       />
 
       {isLoading ? (
-        <LoadingSpinner darkMode={darkMode} message="Cargando asignaturas..." />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-8">
+          {[...Array(21)].map((_, index) => (
+            <SkeletonCard key={index} darkMode={darkMode} />
+          ))}
+        </div>
       ) : currentSections.length > 0 ? (
         <>
           <CourseTable

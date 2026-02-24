@@ -22,11 +22,21 @@ body {
   text-rendering: optimizeSpeed;
 }
 
+/* Prevent layout shift from scrollbar */
+html {
+  overflow-y: scroll;
+}
+
 /* Prevent layout shift */
 img, video, iframe {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+/* Reserve aspect ratio for images */
+img {
+  aspect-ratio: attr(width) / attr(height);
 }
 
 /* Lazy loading for images */

@@ -66,8 +66,8 @@ const Navigation: React.FC<NavigationProps> = ({
   }, [showProfileDropdown, setShowProfileDropdown]);
 
   return (
-    <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md sticky top-0 z-50`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center relative">
+    <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md sticky top-0 z-50 h-[72px]`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center relative h-full">
 
         {/* Logo */}
         <Link
