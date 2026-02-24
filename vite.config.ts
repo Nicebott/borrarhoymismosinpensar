@@ -17,22 +17,48 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY || ''),
     },
     build: {
-      target: 'es2015',
+      target: 'es2020',
       cssCodeSplit: true,
       minify: 'terser',
       terserOptions: {
         compress: {
           drop_console: mode === 'production',
           drop_debugger: true,
-          pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : []
+          pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : [],
+          passes: 3,
+          arrows: true,
+          arguments: true,
+          booleans: true,
+          dead_code: true,
+          evaluate: true,
+          join_vars: true,
+          loops: true,
+          reduce_vars: true,
+          unused: true,
+          collapse_vars: true,
+          inline: true
+        },
+        mangle: {
+          safari10: true,
+          toplevel: true
+        },
+        format: {
+          comments: false
         }
       },
       rollupOptions: {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-                return 'react-vendor';
+              // Split React into smaller chunks
+              if (id.includes('react-dom')) {
+                return 'react-dom';
+              }
+              if (id.includes('react/') && !id.includes('react-dom')) {
+                return 'react';
+              }
+              if (id.includes('react-router')) {
+                return 'react-router';
               }
               if (id.includes('@supabase')) {
                 return 'supabase';
@@ -43,10 +69,29 @@ export default defineConfig(({ mode }) => {
               if (id.includes('emoji-picker-react')) {
                 return 'emoji-picker';
               }
-              if (id.includes('lucide-react') || id.includes('date-fns')) {
-                return 'ui';
+              if (id.includes('lucide-react')) {
+                return 'icons';
+              }
+              if (id.includes('date-fns')) {
+                return 'date';
+              }
+              if (id.includes('react-hot-toast')) {
+                return 'toast';
               }
               return 'vendor';
+            }
+            // Split large component groups
+            if (id.includes('src/pages/')) {
+              return 'pages';
+            }
+            if (id.includes('src/components/Forum/')) {
+              return 'forum';
+            }
+            if (id.includes('src/components/Chat/')) {
+              return 'chat';
+            }
+            if (id.includes('src/components/Reviews/')) {
+              return 'reviews';
             }
           },
           assetFileNames: (assetInfo) => {
@@ -60,16 +105,29 @@ export default defineConfig(({ mode }) => {
             return `assets/[name]-[hash][extname]`;
           },
           chunkFileNames: 'assets/js/[name]-[hash].js',
-          entryFileNames: 'assets/js/[name]-[hash].js'
+          entryFileNames: 'assets/js/[name]-[hash].js',
+          experimentalMinChunkSize: 15000
         }
       },
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 600,
       reportCompressedSize: false,
       sourcemap: false
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', 'react-router-dom'],
-      exclude: ['emoji-picker-react']
+      include: [
+        'react',
+        'react-dom',
+        'react-router-dom',
+        '@supabase/supabase-js',
+        'date-fns',
+        'lucide-react'
+      ],
+      exclude: ['emoji-picker-react', 'framer-motion']
+    },
+    server: {
+      hmr: {
+        overlay: false
+      }
     }
   };
 });

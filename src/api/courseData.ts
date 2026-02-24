@@ -1,6 +1,17 @@
 import { Course, Section } from '../types';
 
+// Cache for course data
+let cachedData: { courses: Course[], sections: Section[] } | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export async function fetchCourseData(): Promise<{ courses: Course[], sections: Section[] }> {
+  // Return cached data if still valid
+  const now = Date.now();
+  if (cachedData && (now - cacheTimestamp) < CACHE_DURATION) {
+    return cachedData;
+  }
+
   try {
     const response = await fetch('/data.json');
     const data = await response.json();
@@ -56,9 +67,21 @@ export async function fetchCourseData(): Promise<{ courses: Course[], sections: 
     });
 
     const courses = Array.from(coursesMap.values());
-    return { courses, sections };
+    const result = { courses, sections };
+
+    // Update cache
+    cachedData = result;
+    cacheTimestamp = Date.now();
+
+    return result;
   } catch (error) {
     console.error('Error fetching course data:', error);
-    return { courses: [], sections: [] };
+    return cachedData || { courses: [], sections: [] };
   }
+}
+
+// Function to invalidate cache
+export function invalidateCourseDataCache() {
+  cachedData = null;
+  cacheTimestamp = 0;
 }

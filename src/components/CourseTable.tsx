@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback, Suspense } from 'react';
 import { Course, Section } from '../types';
 import { Search, Star, BookOpen, MapPin, Clock, Users, Globe } from 'lucide-react';
-import ProfessorDetailsModal from './ProfessorDetailsModal';
-import ReviewModal from './ReviewModal';
 import { supabase } from '../supabase';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from './ui/Card';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
-import Tooltip from './ui/Tooltip';
+
+// Lazy load modals to reduce initial bundle size
+const ProfessorDetailsModal = React.lazy(() => import('./ProfessorDetailsModal'));
+const ReviewModal = React.lazy(() => import('./ReviewModal'));
 
 interface ProfessorRating {
   rating: number;
@@ -46,26 +46,22 @@ const CourseCard = memo<{
             {getModalityBadge(section.modalidad)}
           </div>
           <div className="space-y-2">
-            <Tooltip content="Codigo y NRC del curso">
-              <div className="flex items-center text-sm">
-                <BookOpen size={16} className="mr-2 text-blue-500" />
-                <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                  {course.code} - NRC: {section.nrc}
-                </span>
-              </div>
-            </Tooltip>
-            <Tooltip content="Campus y Horario">
-              <div className="flex items-center text-sm">
-                <MapPin size={16} className="mr-2 text-green-500" />
-                <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                  {section.campus}
-                </span>
-                <Clock size={16} className="ml-4 mr-2 text-purple-500" />
-                <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                  {section.schedule}
-                </span>
-              </div>
-            </Tooltip>
+            <div className="flex items-center text-sm">
+              <BookOpen size={16} className="mr-2 text-blue-500" />
+              <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
+                {course.code} - NRC: {section.nrc}
+              </span>
+            </div>
+            <div className="flex items-center text-sm">
+              <MapPin size={16} className="mr-2 text-green-500" />
+              <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
+                {section.campus}
+              </span>
+              <Clock size={16} className="ml-4 mr-2 text-purple-500" />
+              <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
+                {section.schedule}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -125,6 +121,8 @@ const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSect
   const [professorRatings, setProfessorRatings] = useState<Record<string, ProfessorRating>>({});
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProfessorRatings = async () => {
       const uniqueProfessors = [...new Set(sections.map(section => section.professor))];
 
@@ -132,62 +130,84 @@ const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSect
         return;
       }
 
+      // Split into batches of 100 to avoid query size limits
+      const batchSize = 100;
+      const batches = [];
+      for (let i = 0; i < uniqueProfessors.length; i += batchSize) {
+        batches.push(uniqueProfessors.slice(i, i + batchSize));
+      }
+
       const ratings: Record<string, ProfessorRating> = {};
 
       try {
-        // Batch query - fetch all reviews for all professors in one query
-        const { data: allReviews, error } = await supabase
-          .from('reviews')
-          .select('professor_id, rating, clarity, fairness, punctuality, would_take_again')
-          .in('professor_id', uniqueProfessors);
+        // Fetch all batches in parallel
+        const batchPromises = batches.map(batch =>
+          supabase
+            .from('reviews')
+            .select('professor_id, rating, clarity, fairness, punctuality, would_take_again')
+            .in('professor_id', batch)
+        );
 
-        if (!error && allReviews) {
-          // Group reviews by professor
-          const reviewsByProfessor: Record<string, typeof allReviews> = {};
+        const results = await Promise.all(batchPromises);
 
-          allReviews.forEach(review => {
-            if (!reviewsByProfessor[review.professor_id]) {
-              reviewsByProfessor[review.professor_id] = [];
-            }
-            reviewsByProfessor[review.professor_id].push(review);
-          });
+        if (!isMounted) return;
 
-          // Calculate averages for each professor
-          Object.entries(reviewsByProfessor).forEach(([professor, reviews]) => {
-            if (reviews.length > 0) {
-              const totals = reviews.reduce((acc, review) => ({
-                rating: acc.rating + review.rating,
-                clarity: acc.clarity + (review.clarity || 0),
-                fairness: acc.fairness + (review.fairness || 0),
-                punctuality: acc.punctuality + (review.punctuality || 0),
-                wouldTakeAgain: acc.wouldTakeAgain + (review.would_take_again || 0)
-              }), {
-                rating: 0,
-                clarity: 0,
-                fairness: 0,
-                punctuality: 0,
-                wouldTakeAgain: 0
-              });
+        // Process all results
+        const allReviews = results.flatMap(result => result.data || []);
 
-              const count = reviews.length;
-              ratings[professor] = {
-                rating: Number((totals.rating / count).toFixed(1)),
-                clarity: Number((totals.clarity / count).toFixed(1)),
-                fairness: Number((totals.fairness / count).toFixed(1)),
-                punctuality: Number((totals.punctuality / count).toFixed(1)),
-                wouldTakeAgain: Number((totals.wouldTakeAgain / count).toFixed(1))
-              };
-            }
-          });
+        // Group reviews by professor
+        const reviewsByProfessor: Record<string, typeof allReviews> = {};
+
+        allReviews.forEach(review => {
+          if (!reviewsByProfessor[review.professor_id]) {
+            reviewsByProfessor[review.professor_id] = [];
+          }
+          reviewsByProfessor[review.professor_id].push(review);
+        });
+
+        // Calculate averages for each professor
+        Object.entries(reviewsByProfessor).forEach(([professor, reviews]) => {
+          if (reviews.length > 0) {
+            const totals = reviews.reduce((acc, review) => ({
+              rating: acc.rating + review.rating,
+              clarity: acc.clarity + (review.clarity || 0),
+              fairness: acc.fairness + (review.fairness || 0),
+              punctuality: acc.punctuality + (review.punctuality || 0),
+              wouldTakeAgain: acc.wouldTakeAgain + (review.would_take_again || 0)
+            }), {
+              rating: 0,
+              clarity: 0,
+              fairness: 0,
+              punctuality: 0,
+              wouldTakeAgain: 0
+            });
+
+            const count = reviews.length;
+            ratings[professor] = {
+              rating: Number((totals.rating / count).toFixed(1)),
+              clarity: Number((totals.clarity / count).toFixed(1)),
+              fairness: Number((totals.fairness / count).toFixed(1)),
+              punctuality: Number((totals.punctuality / count).toFixed(1)),
+              wouldTakeAgain: Number((totals.wouldTakeAgain / count).toFixed(1))
+            };
+          }
+        });
+
+        if (isMounted) {
+          setProfessorRatings(ratings);
         }
       } catch (error) {
-        console.error('Error fetching ratings:', error);
+        if (isMounted) {
+          console.error('Error fetching ratings:', error);
+        }
       }
-
-      setProfessorRatings(ratings);
     };
 
     fetchProfessorRatings();
+
+    return () => {
+      isMounted = false;
+    };
   }, [sections]);
 
   const handleRateClick = useCallback((sectionId: string, professorId: string) => {
@@ -237,62 +257,56 @@ const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSect
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-8 auto-rows-max">
-      <AnimatePresence mode="popLayout">
-        {sections.map((section, index) => {
-          const course = courseMap.get(section.courseId);
-          if (!course) return null;
+      {sections.map((section, index) => {
+        const course = courseMap.get(section.courseId);
+        if (!course) return null;
 
-          const rating = professorRatings[section.professor];
+        const rating = professorRatings[section.professor];
 
-          return (
-            <motion.div
-              key={`${section.id}-${section.nrc}-${section.professor}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2, delay: Math.min(index * 0.05, 0.5) }}
-            >
-              <CourseCard
-                section={section}
-                course={course}
-                rating={rating}
-                darkMode={darkMode}
-                onDetailsClick={handleDetailsClick}
-                onRateClick={handleRateClick}
-                getModalityBadge={getModalityBadge}
-              />
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+        return (
+          <div key={`${section.id}-${section.nrc}-${section.professor}`}>
+            <CourseCard
+              section={section}
+              course={course}
+              rating={rating}
+              darkMode={darkMode}
+              onDetailsClick={handleDetailsClick}
+              onRateClick={handleRateClick}
+              getModalityBadge={getModalityBadge}
+            />
+          </div>
+        );
+      })}
 
-      {selectedProfessor && !showReviewModal && (
-        <ProfessorDetailsModal
-          key={`details-${selectedProfessor.id}`}
-          isOpen={!!selectedProfessor}
-          onClose={() => setSelectedProfessor(null)}
-          darkMode={darkMode}
-          professorId={selectedProfessor.id}
-          professorName={selectedProfessor.name}
-          currentUser={currentUser}
-        />
-      )}
+      <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-50 z-50" />}>
+        {selectedProfessor && !showReviewModal && (
+          <ProfessorDetailsModal
+            key={`details-${selectedProfessor.id}`}
+            isOpen={!!selectedProfessor}
+            onClose={() => setSelectedProfessor(null)}
+            darkMode={darkMode}
+            professorId={selectedProfessor.id}
+            professorName={selectedProfessor.name}
+            currentUser={currentUser}
+          />
+        )}
 
-      {showReviewModal && selectedProfessor && currentUser && (
-        <ReviewModal
-          key={`review-${selectedProfessor.id}`}
-          isOpen={showReviewModal}
-          onClose={() => {
-            setShowReviewModal(false);
-            setSelectedProfessor(null);
-          }}
-          darkMode={darkMode}
-          professorId={selectedProfessor.id}
-          professorName={selectedProfessor.name}
-          userId={currentUser.id}
-          userName={currentUser.displayName}
-        />
-      )}
+        {showReviewModal && selectedProfessor && currentUser && (
+          <ReviewModal
+            key={`review-${selectedProfessor.id}`}
+            isOpen={showReviewModal}
+            onClose={() => {
+              setShowReviewModal(false);
+              setSelectedProfessor(null);
+            }}
+            darkMode={darkMode}
+            professorId={selectedProfessor.id}
+            professorName={selectedProfessor.name}
+            userId={currentUser.id}
+            userName={currentUser.displayName}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };

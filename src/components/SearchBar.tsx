@@ -28,20 +28,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
     setCampus(selectedCampus);
   }, [selectedCampus]);
 
-  const saveSearch = (searchQuery: string) => {
+  const saveSearch = useCallback((searchQuery: string) => {
     if (!searchQuery.trim()) return;
-    
+
     const updated = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 5);
     setRecentSearches(updated);
     localStorage.setItem('recentSearches', JSON.stringify(updated));
-  };
+  }, [recentSearches]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     saveSearch(query);
     onSearch(query, campus);
     setShowRecentSearches(false);
-  };
+  }, [query, campus, onSearch]);
 
   const handleRecentSearchClick = useCallback((searchQuery: string) => {
     setQuery(searchQuery);

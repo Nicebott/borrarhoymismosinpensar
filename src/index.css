@@ -19,6 +19,7 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
 }
 
 /* Prevent layout shift */
@@ -26,6 +27,18 @@ img, video, iframe {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+/* Lazy loading for images */
+img[loading="lazy"] {
+  content-visibility: auto;
+}
+
+/* Reduce paint areas */
+@media (hover: hover) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 /* Optimize animations */

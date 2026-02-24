@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import CourseTable from '../components/CourseTable';
@@ -9,7 +9,6 @@ import { Course, Section } from '../types';
 import { fetchCourseData } from '../api/courseData';
 import { normalizeText } from '../utils/stringUtils';
 import { GraduationCap } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const ALL_CAMPUSES = [
   'Santo Domingo',
@@ -47,7 +46,7 @@ interface HomePageProps {
   onOpenAuth: () => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }) => {
+const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenAuth }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [allSections, setAllSections] = useState<Section[]>([]);
@@ -152,23 +151,14 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
         description="Consulta la programacion docente UASD 2025-10. Busca asignaturas, horarios, profesores y NRC por campus. Modalidades presencial, virtual y semipresencial disponibles."
         keywords="programacion docente uasd, horarios uasd 2025-10, asignaturas uasd, nrc uasd, profesores uasd, universidad autonoma santo domingo, inscripciones uasd, calendario academico"
       />
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="flex flex-col items-center"
-      >
+      <div className="flex flex-col items-center">
       <div className="w-full max-w-4xl text-center mb-8">
-        <motion.div
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          className="inline-block"
-        >
+        <div className="inline-block">
           <GraduationCap
             size={64}
             className={`${darkMode ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`}
           />
-        </motion.div>
+        </div>
         <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${
           darkMode ? 'text-white' : 'text-gray-900'
         }`}>
@@ -217,11 +207,7 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
           </p>
         </>
       ) : (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className={`mt-12 text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}
-        >
+        <div className={`mt-12 text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           <GraduationCap className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p className="text-xl font-medium mb-2">
             {selectedCampus
@@ -231,11 +217,13 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
           <p className="text-sm">
             Intenta ajustar los filtros o realizar una nueva busqueda
           </p>
-        </motion.div>
+        </div>
       )}
-      </motion.div>
+      </div>
     </>
   );
-};
+});
+
+HomePage.displayName = 'HomePage';
 
 export default HomePage;
