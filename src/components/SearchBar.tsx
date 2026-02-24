@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from './ui/Button';
@@ -43,11 +43,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
     setShowRecentSearches(false);
   };
 
-  const handleRecentSearchClick = (searchQuery: string) => {
+  const handleRecentSearchClick = useCallback((searchQuery: string) => {
     setQuery(searchQuery);
     onSearch(searchQuery, campus);
     setShowRecentSearches(false);
-  };
+  }, [campus, onSearch]);
 
   const clearRecentSearches = () => {
     setRecentSearches([]);

@@ -34,42 +34,61 @@ const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSect
   useEffect(() => {
     const fetchProfessorRatings = async () => {
       const uniqueProfessors = [...new Set(sections.map(section => section.professor))];
+
+      if (uniqueProfessors.length === 0) {
+        return;
+      }
+
       const ratings: Record<string, ProfessorRating> = {};
 
-      for (const professor of uniqueProfessors) {
-        try {
-          const { data: reviews, error } = await supabase
-            .from('reviews')
-            .select('rating, clarity, fairness, punctuality, would_take_again')
-            .eq('professor_id', professor);
+      try {
+        // Batch query - fetch all reviews for all professors in one query
+        const { data: allReviews, error } = await supabase
+          .from('reviews')
+          .select('professor_id, rating, clarity, fairness, punctuality, would_take_again')
+          .in('professor_id', uniqueProfessors);
 
-          if (!error && reviews && reviews.length > 0) {
-            const totals = reviews.reduce((acc, review) => ({
-              rating: acc.rating + review.rating,
-              clarity: acc.clarity + (review.clarity || 0),
-              fairness: acc.fairness + (review.fairness || 0),
-              punctuality: acc.punctuality + (review.punctuality || 0),
-              wouldTakeAgain: acc.wouldTakeAgain + (review.would_take_again || 0)
-            }), {
-              rating: 0,
-              clarity: 0,
-              fairness: 0,
-              punctuality: 0,
-              wouldTakeAgain: 0
-            });
+        if (!error && allReviews) {
+          // Group reviews by professor
+          const reviewsByProfessor: Record<string, typeof allReviews> = {};
 
-            const count = reviews.length;
-            ratings[professor] = {
-              rating: Number((totals.rating / count).toFixed(1)),
-              clarity: Number((totals.clarity / count).toFixed(1)),
-              fairness: Number((totals.fairness / count).toFixed(1)),
-              punctuality: Number((totals.punctuality / count).toFixed(1)),
-              wouldTakeAgain: Number((totals.wouldTakeAgain / count).toFixed(1))
-            };
-          }
-        } catch (error) {
-          console.error('Error fetching ratings for professor:', professor, error);
+          allReviews.forEach(review => {
+            if (!reviewsByProfessor[review.professor_id]) {
+              reviewsByProfessor[review.professor_id] = [];
+            }
+            reviewsByProfessor[review.professor_id].push(review);
+          });
+
+          // Calculate averages for each professor
+          Object.entries(reviewsByProfessor).forEach(([professor, reviews]) => {
+            if (reviews.length > 0) {
+              const totals = reviews.reduce((acc, review) => ({
+                rating: acc.rating + review.rating,
+                clarity: acc.clarity + (review.clarity || 0),
+                fairness: acc.fairness + (review.fairness || 0),
+                punctuality: acc.punctuality + (review.punctuality || 0),
+                wouldTakeAgain: acc.wouldTakeAgain + (review.would_take_again || 0)
+              }), {
+                rating: 0,
+                clarity: 0,
+                fairness: 0,
+                punctuality: 0,
+                wouldTakeAgain: 0
+              });
+
+              const count = reviews.length;
+              ratings[professor] = {
+                rating: Number((totals.rating / count).toFixed(1)),
+                clarity: Number((totals.clarity / count).toFixed(1)),
+                fairness: Number((totals.fairness / count).toFixed(1)),
+                punctuality: Number((totals.punctuality / count).toFixed(1)),
+                wouldTakeAgain: Number((totals.wouldTakeAgain / count).toFixed(1))
+              };
+            }
+          });
         }
+      } catch (error) {
+        console.error('Error fetching ratings:', error);
       }
 
       setProfessorRatings(ratings);

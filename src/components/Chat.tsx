@@ -38,33 +38,32 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
   }, []);
 
   useEffect(() => {
-    if (user && session) {
-      const fetchProfile = async () => {
-        const { data } = await supabase
-          .from('profiles')
-          .select('display_name')
-          .eq('id', user.id)
-          .maybeSingle();
+    if (user?.id && session) {
+      const fetchProfileAndCheckAdmin = async () => {
+        // Batch both queries in parallel
+        const [profileResult, isAdminUser, isSuperAdminUser] = await Promise.all([
+          supabase
+            .from('profiles')
+            .select('display_name')
+            .eq('id', user.id)
+            .maybeSingle(),
+          checkIsAdmin(user.id),
+          checkIsSuperAdmin(user.id)
+        ]);
 
-        if (data?.display_name) {
-          setDisplayName(data.display_name);
+        if (profileResult.data?.display_name) {
+          setDisplayName(profileResult.data.display_name);
         }
-      };
 
-      fetchProfile();
-
-      const checkAdminStatus = async () => {
-        const isAdminUser = await checkIsAdmin(user.id);
-        const isSuperAdminUser = await checkIsSuperAdmin(user.id);
         setIsAdmin(isAdminUser || isSuperAdminUser);
       };
 
-      checkAdminStatus();
+      fetchProfileAndCheckAdmin();
     } else {
       setHasEnteredChat(false);
       localStorage.removeItem('chatEntered');
     }
-  }, [user, session]);
+  }, [user?.id, session]);
 
   const handleSendMessage = async (text: string) => {
     const success = await sendMessage(text);

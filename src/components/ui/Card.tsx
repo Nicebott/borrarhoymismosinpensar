@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { cn } from '../../utils/cn';
 
 interface CardProps {
@@ -6,7 +6,7 @@ interface CardProps {
   className?: string;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className }) => {
+export const Card: React.FC<CardProps> = memo(({ children, className }) => {
   return (
     <div className={cn(
       'rounded-lg border bg-card text-card-foreground shadow-sm',
@@ -16,44 +16,56 @@ export const Card: React.FC<CardProps> = ({ children, className }) => {
       {children}
     </div>
   );
-};
+});
 
-export const CardHeader: React.FC<CardProps> = ({ children, className }) => {
+Card.displayName = 'Card';
+
+export const CardHeader: React.FC<CardProps> = memo(({ children, className }) => {
   return (
     <div className={cn('flex flex-col space-y-1.5 p-6', className)}>
       {children}
     </div>
   );
-};
+});
 
-export const CardTitle: React.FC<CardProps> = ({ children, className }) => {
+CardHeader.displayName = 'CardHeader';
+
+export const CardTitle: React.FC<CardProps> = memo(({ children, className }) => {
   return (
     <h3 className={cn('text-2xl font-semibold leading-none tracking-tight', className)}>
       {children}
     </h3>
   );
-};
+});
 
-export const CardDescription: React.FC<CardProps> = ({ children, className }) => {
+CardTitle.displayName = 'CardTitle';
+
+export const CardDescription: React.FC<CardProps> = memo(({ children, className }) => {
   return (
     <p className={cn('text-sm text-muted-foreground', className)}>
       {children}
     </p>
   );
-};
+});
 
-export const CardContent: React.FC<CardProps> = ({ children, className }) => {
+CardDescription.displayName = 'CardDescription';
+
+export const CardContent: React.FC<CardProps> = memo(({ children, className }) => {
   return (
     <div className={cn('p-6 pt-0', className)}>
       {children}
     </div>
   );
-};
+});
 
-export const CardFooter: React.FC<CardProps> = ({ children, className }) => {
+CardContent.displayName = 'CardContent';
+
+export const CardFooter: React.FC<CardProps> = memo(({ children, className }) => {
   return (
     <div className={cn('flex items-center p-6 pt-0', className)}>
       {children}
     </div>
   );
-};
+});
+
+CardFooter.displayName = 'CardFooter';

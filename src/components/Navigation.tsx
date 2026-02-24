@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   GraduationCap,
@@ -215,4 +215,4 @@ const NavLink: React.FC<NavLinkProps> = ({ to, isActive, darkMode, onClick, chil
   </Link>
 );
 
-export default Navigation;
+export default memo(Navigation);
