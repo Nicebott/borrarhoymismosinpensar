@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+    <loc>https://misemestre.com/</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://misemestre.com/" />
+    <xhtml:link rel="alternate" hreflang="es-do" href="https://misemestre.com/" />
+  </url>
+
+  <url>
+    <loc>https://misemestre.com/virtual</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://misemestre.com/virtual" />
+  </url>
+
+  <url>
+    <loc>https://misemestre.com/semipresencial</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://misemestre.com/semipresencial" />
+  </url>
+
+  <url>
+    <loc>https://misemestre.com/faq</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://misemestre.com/faq" />
+  </url>
+
+  <url>
+    <loc>https://misemestre.com/foro</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://misemestre.com/foro" />
+  </url>
+
+  <url>
+    <loc>https://misemestre.com/terms</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://misemestre.com/terms" />
+  </url>
+
+  <url>
+    <loc>https://misemestre.com/privacy</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://misemestre.com/privacy" />
+  </url>
+
+  <url>
+    <loc>https://misemestre.com/community-rules</loc>
+    <lastmod>2026-02-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://misemestre.com/community-rules" />
+  </url>
+
+</urlset>
