@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, MapPin, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from './ui/Button';
@@ -11,7 +11,7 @@ interface SearchBarProps {
   darkMode: boolean;
 }
 
-const SearchBar: React.FC<SearchBarProps> = memo(({ onSearch, campuses, selectedCampus, darkMode }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampus, darkMode }) => {
   const [query, setQuery] = useState('');
   const [campus, setCampus] = useState(selectedCampus);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -185,8 +185,6 @@ const SearchBar: React.FC<SearchBarProps> = memo(({ onSearch, campuses, selected
       </motion.div>
     </div>
   );
-});
-
-SearchBar.displayName = 'SearchBar';
+};
 
 export default SearchBar;
