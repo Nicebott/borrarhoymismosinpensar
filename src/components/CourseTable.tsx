@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useMemo } from 'react';
 import { Course, Section } from '../types';
 import { Search, Star, BookOpen, MapPin, Clock, Users, Globe } from 'lucide-react';
 import ProfessorDetailsModal from './ProfessorDetailsModal';
@@ -26,7 +26,7 @@ interface CourseTableProps {
   currentUser: { id: string; displayName: string; email: string } | null;
 }
 
-const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSection, darkMode, currentUser }) => {
+const CourseTable: React.FC<CourseTableProps> = memo(({ courses, sections, onRateSection, darkMode, currentUser }) => {
   const [selectedProfessor, setSelectedProfessor] = useState<{ id: string; name: string } | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [professorRatings, setProfessorRatings] = useState<Record<string, ProfessorRating>>({});
@@ -244,6 +244,8 @@ const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSect
       )}
     </div>
   );
-};
+});
+
+CourseTable.displayName = 'CourseTable';
 
 export default CourseTable;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import CourseTable from '../components/CourseTable';
@@ -232,4 +232,4 @@ const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }
   );
 };
 
-export default HomePage;
+export default memo(HomePage);

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   GraduationCap,
@@ -26,7 +26,7 @@ interface NavigationProps {
   isUserAdmin: boolean;
 }
 
-const Navigation: React.FC<NavigationProps> = ({
+const Navigation: React.FC<NavigationProps> = memo(({
   isMenuOpen,
   setIsMenuOpen,
   darkMode,
@@ -187,7 +187,9 @@ const Navigation: React.FC<NavigationProps> = ({
       </div>
     </header>
   );
-};
+});
+
+Navigation.displayName = 'Navigation';
 
 interface NavLinkProps {
   to: string;
@@ -197,7 +199,7 @@ interface NavLinkProps {
   children: React.ReactNode;
 }
 
-const NavLink: React.FC<NavLinkProps> = ({ to, isActive, darkMode, onClick, children }) => (
+const NavLink: React.FC<NavLinkProps> = memo(({ to, isActive, darkMode, onClick, children }) => (
   <Link
     to={to}
     onClick={onClick}
@@ -213,6 +215,8 @@ const NavLink: React.FC<NavLinkProps> = ({ to, isActive, darkMode, onClick, chil
   >
     {children}
   </Link>
-);
+));
+
+NavLink.displayName = 'NavLink';
 
 export default Navigation;
