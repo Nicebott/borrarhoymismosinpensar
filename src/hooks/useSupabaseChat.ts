@@ -16,23 +16,54 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
       setLoading(true);
 
       const fetchMessages = async () => {
-        const { data, error } = await supabase
+        // Fetch regular chat messages
+        const { data: chatData, error: chatError } = await supabase
           .from('chat_messages')
           .select('*')
           .order('created_at', { ascending: true })
           .limit(MESSAGES_PER_PAGE);
 
-        if (!error && data) {
-          setMessages(
-            data.map((m) => ({
+        // Fetch active system messages
+        const { data: systemData, error: systemError } = await supabase
+          .from('system_messages')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: true });
+
+        const allMessages: Message[] = [];
+
+        // Add chat messages
+        if (!chatError && chatData) {
+          chatData.forEach((m) => {
+            allMessages.push({
               id: m.id,
               text: m.text,
               timestamp: new Date(m.created_at).getTime(),
               username: m.username,
               isAdmin: m.is_admin,
-            }))
-          );
+            });
+          });
         }
+
+        // Add system messages
+        if (!systemError && systemData) {
+          systemData.forEach((m) => {
+            allMessages.push({
+              id: `system-${m.id}`,
+              text: m.text,
+              timestamp: new Date(m.created_at).getTime(),
+              username: 'Sistema',
+              isAdmin: false,
+              isSystem: true,
+              systemType: m.message_type,
+            });
+          });
+        }
+
+        // Sort all messages by timestamp
+        allMessages.sort((a, b) => a.timestamp - b.timestamp);
+
+        setMessages(allMessages);
         setLoading(false);
       };
 
@@ -42,7 +73,7 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
       localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
       setUnreadCount(0);
 
-      // Realtime subscription
+      // Realtime subscription for chat messages
       const channel = supabase
         .channel('chat-messages')
         .on(
@@ -70,6 +101,47 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
           (payload) => {
             const deletedId = (payload.old as any).id;
             setMessages((prev) => prev.filter((msg) => msg.id !== deletedId));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'system_messages' },
+          (payload) => {
+            const m = payload.new as any;
+            if (m.is_active) {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: `system-${m.id}`,
+                  text: m.text,
+                  timestamp: new Date(m.created_at).getTime(),
+                  username: 'Sistema',
+                  isAdmin: false,
+                  isSystem: true,
+                  systemType: m.message_type,
+                },
+              ]);
+              localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'DELETE', schema: 'public', table: 'system_messages' },
+          (payload) => {
+            const deletedId = (payload.old as any).id;
+            setMessages((prev) => prev.filter((msg) => msg.id !== `system-${deletedId}`));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'system_messages' },
+          (payload) => {
+            const m = payload.new as any;
+            if (!m.is_active) {
+              // Remove system message if deactivated
+              setMessages((prev) => prev.filter((msg) => msg.id !== `system-${m.id}`));
+            }
           }
         )
         .subscribe();

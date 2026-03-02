@@ -2,7 +2,7 @@ import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion } from 'framer-motion';
-import { Trash2, Shield } from 'lucide-react';
+import { Trash2, Shield, AlertCircle } from 'lucide-react';
 
 interface ChatMessageProps {
   message: {
@@ -11,6 +11,8 @@ interface ChatMessageProps {
     timestamp: number;
     username: string;
     isAdmin: boolean;
+    isSystem?: boolean;
+    systemType?: 'maintenance' | 'error' | 'info';
   };
   darkMode: boolean;
   isCurrentUser: boolean;
@@ -34,6 +36,34 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     locale: es
   });
 
+  const getSystemBadgeStyles = () => {
+    if (!message.isSystem) return null;
+
+    switch (message.systemType) {
+      case 'maintenance':
+        return {
+          bg: darkMode ? 'bg-gradient-to-r from-yellow-600 to-orange-600' : 'bg-gradient-to-r from-yellow-500 to-orange-500',
+          text: 'text-white',
+          shadow: 'shadow-lg shadow-yellow-500/30'
+        };
+      case 'error':
+        return {
+          bg: darkMode ? 'bg-gradient-to-r from-red-600 to-red-700' : 'bg-gradient-to-r from-red-500 to-red-600',
+          text: 'text-white',
+          shadow: 'shadow-lg shadow-red-500/30'
+        };
+      case 'info':
+      default:
+        return {
+          bg: darkMode ? 'bg-gradient-to-r from-blue-600 to-blue-700' : 'bg-gradient-to-r from-blue-500 to-blue-600',
+          text: 'text-white',
+          shadow: 'shadow-lg shadow-blue-500/30'
+        };
+    }
+  };
+
+  const systemBadgeStyles = getSystemBadgeStyles();
+
   return (
     <motion.div
       initial={{ opacity: 0, x: isCurrentUser ? 20 : -20, scale: 0.9 }}
@@ -46,35 +76,54 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.1, type: "spring", damping: 15 }}
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg`}
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-lg ${
+            message.isSystem
+              ? 'bg-gradient-to-br from-purple-500 to-purple-600'
+              : 'bg-gradient-to-br from-blue-500 to-blue-600'
+          }`}
         >
-          {userInitials}
+          {message.isSystem ? <AlertCircle className="w-4 h-4" /> : userInitials}
         </motion.div>
       )}
       <motion.div
         whileHover={{ scale: 1.02 }}
         className={`max-w-[85%] md:max-w-[80%] rounded-2xl px-3 md:px-4 py-2.5 shadow-md backdrop-blur-sm ${
-          isCurrentUser
+          message.isSystem
             ? darkMode
-              ? 'bg-gradient-to-br from-blue-600 to-blue-700'
-              : 'bg-gradient-to-br from-blue-500 to-blue-600'
-            : darkMode
-              ? 'bg-gray-700/80'
-              : 'bg-white'
+              ? 'bg-gradient-to-br from-purple-900/50 to-purple-800/50 border border-purple-700/50'
+              : 'bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200'
+            : isCurrentUser
+              ? darkMode
+                ? 'bg-gradient-to-br from-blue-600 to-blue-700'
+                : 'bg-gradient-to-br from-blue-500 to-blue-600'
+              : darkMode
+                ? 'bg-gray-700/80'
+                : 'bg-white'
         }`}
       >
         <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
           <div className="flex items-center gap-1.5">
             <span className={`font-semibold text-xs md:text-sm ${
-              isCurrentUser
-                ? 'text-white'
-                : darkMode
-                  ? 'text-gray-200'
-                  : 'text-gray-800'
+              message.isSystem
+                ? darkMode ? 'text-purple-200' : 'text-purple-800'
+                : isCurrentUser
+                  ? 'text-white'
+                  : darkMode
+                    ? 'text-gray-200'
+                    : 'text-gray-800'
             }`}>
               {message.username}
             </span>
-            {message.isAdmin ? (
+            {message.isSystem ? (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-bold ${systemBadgeStyles?.bg} ${systemBadgeStyles?.text} ${systemBadgeStyles?.shadow}`}
+              >
+                <AlertCircle className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                SISTEMA
+              </motion.span>
+            ) : message.isAdmin ? (
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -118,7 +167,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           </div>
         </div>
         <p className={`text-xs md:text-sm break-words leading-relaxed ${
-          isCurrentUser ? 'text-white' : darkMode ? 'text-gray-100' : 'text-gray-700'
+          message.isSystem
+            ? darkMode ? 'text-purple-100' : 'text-purple-900'
+            : isCurrentUser ? 'text-white' : darkMode ? 'text-gray-100' : 'text-gray-700'
         }`}>
           {message.text}
         </p>

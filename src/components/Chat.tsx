@@ -5,10 +5,8 @@ import { useAuthContext } from '../contexts/AuthContext';
 import ChatMessages from './Chat/ChatMessages';
 import ChatInput from './Chat/ChatInput';
 import ChatEntrance from './Chat/ChatEntrance';
-import SystemMessageBanner from './Chat/SystemMessageBanner';
 import { supabase } from '../supabase';
 import { checkIsAdmin, checkIsSuperAdmin } from '../services/adminService';
-import { getActiveSystemMessages, SystemMessage } from '../services/systemMessageService';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatProps {
@@ -22,7 +20,6 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [hasEnteredChat, setHasEnteredChat] = useState(false);
-  const [systemMessages, setSystemMessages] = useState<SystemMessage[]>([]);
 
   const {
     messages,
@@ -38,44 +35,6 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
     if (chatEntered === 'true') {
       setHasEnteredChat(true);
     }
-  }, []);
-
-  useEffect(() => {
-    const loadSystemMessages = async () => {
-      const messages = await getActiveSystemMessages();
-      setSystemMessages(messages);
-    };
-
-    loadSystemMessages();
-
-    const channel = supabase
-      .channel('system-messages')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'system_messages' },
-        () => {
-          loadSystemMessages();
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'system_messages' },
-        () => {
-          loadSystemMessages();
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'system_messages' },
-        () => {
-          loadSystemMessages();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   useEffect(() => {
@@ -251,15 +210,6 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
                 <ChatEntrance darkMode={darkMode} onEnter={handleEnterChat} onClose={() => setIsChatOpen(false)} />
               ) : (
                 <>
-                  <AnimatePresence>
-                    {systemMessages.map((message) => (
-                      <SystemMessageBanner
-                        key={message.id}
-                        message={message}
-                        darkMode={darkMode}
-                      />
-                    ))}
-                  </AnimatePresence>
                   <ChatMessages
                     messages={messages}
                     darkMode={darkMode}
