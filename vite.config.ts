@@ -36,29 +36,28 @@ export default defineConfig(({ mode }) => {
           reduce_vars: true,
           unused: true,
           collapse_vars: true,
-          inline: true
+          inline: 2,
+          side_effects: true
         },
         mangle: {
           safari10: true,
           toplevel: true
         },
         format: {
-          comments: false
+          comments: false,
+          ecma: 2020
         }
       },
       rollupOptions: {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
-              // Split React into smaller chunks
-              if (id.includes('react-dom')) {
-                return 'react-dom';
-              }
-              if (id.includes('react/') && !id.includes('react-dom')) {
-                return 'react';
+              // Core React libs - keep together
+              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+                return 'react-vendor';
               }
               if (id.includes('react-router')) {
-                return 'react-router';
+                return 'router';
               }
               if (id.includes('@supabase')) {
                 return 'supabase';
@@ -67,38 +66,46 @@ export default defineConfig(({ mode }) => {
                 return 'framer';
               }
               if (id.includes('emoji-picker-react')) {
-                return 'emoji-picker';
+                return 'emoji';
               }
               if (id.includes('lucide-react')) {
                 return 'icons';
               }
               if (id.includes('date-fns')) {
-                return 'date';
+                return 'date-fns';
               }
               if (id.includes('react-hot-toast')) {
                 return 'toast';
               }
+              if (id.includes('clsx') || id.includes('tailwind-merge')) {
+                return 'utils';
+              }
               return 'vendor';
             }
-            // Split large component groups
+
+            // Split pages individually
             if (id.includes('src/pages/')) {
+              const match = id.match(/pages\/(\w+)Page/);
+              if (match) return `page-${match[1].toLowerCase()}`;
               return 'pages';
             }
-            if (id.includes('src/components/Forum/')) {
-              return 'forum';
-            }
-            if (id.includes('src/components/Chat/')) {
-              return 'chat';
-            }
-            if (id.includes('src/components/Reviews/')) {
-              return 'reviews';
-            }
+
+            // Component groups
+            if (id.includes('src/components/Forum/')) return 'comp-forum';
+            if (id.includes('src/components/Chat/')) return 'comp-chat';
+            if (id.includes('src/components/Reviews/')) return 'comp-reviews';
+            if (id.includes('src/components/Admin/')) return 'comp-admin';
+            if (id.includes('src/components/Auth/')) return 'comp-auth';
+
+            // Services and contexts
+            if (id.includes('src/services/')) return 'services';
+            if (id.includes('src/contexts/')) return 'contexts';
           },
           assetFileNames: (assetInfo) => {
             const info = assetInfo.name.split('.');
             const ext = info[info.length - 1];
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
-              return `assets/images/[name]-[hash][extname]`;
+              return `assets/img/[name]-[hash][extname]`;
             } else if (/woff|woff2/.test(ext)) {
               return `assets/fonts/[name]-[hash][extname]`;
             }
@@ -106,12 +113,19 @@ export default defineConfig(({ mode }) => {
           },
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
-          experimentalMinChunkSize: 15000
+          experimentalMinChunkSize: 10000,
+          compact: true
+        },
+        treeshake: {
+          moduleSideEffects: 'no-external',
+          propertyReadSideEffects: false,
+          tryCatchDeoptimization: false
         }
       },
-      chunkSizeWarningLimit: 600,
+      chunkSizeWarningLimit: 500,
       reportCompressedSize: false,
-      sourcemap: false
+      sourcemap: false,
+      cssMinify: true
     },
     optimizeDeps: {
       include: [
@@ -119,10 +133,16 @@ export default defineConfig(({ mode }) => {
         'react-dom',
         'react-router-dom',
         '@supabase/supabase-js',
-        'date-fns',
-        'lucide-react'
+        'date-fns/formatDistanceToNow',
+        'date-fns/format',
+        'lucide-react',
+        'clsx',
+        'tailwind-merge'
       ],
-      exclude: ['emoji-picker-react', 'framer-motion']
+      exclude: ['emoji-picker-react'],
+      esbuildOptions: {
+        target: 'es2020'
+      }
     },
     server: {
       hmr: {
