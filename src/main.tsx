@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, startTransition } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
@@ -13,18 +13,23 @@ if (!rootElement) throw new Error('Failed to find the root element');
 const root = createRoot(rootElement, {
   // Enable concurrent features for better performance
   onRecoverableError: (error) => {
-    console.error('Recoverable error:', error);
+    if (import.meta.env.DEV) {
+      console.error('Recoverable error:', error);
+    }
   }
 });
 
-root.render(
-  <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <AdminProvider>
-          <App />
-        </AdminProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>
-);
+// Use startTransition for better performance
+startTransition(() => {
+  root.render(
+    <StrictMode>
+      <BrowserRouter>
+        <AuthProvider>
+          <AdminProvider>
+            <App />
+          </AdminProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </StrictMode>
+  );
+});

@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
           drop_console: mode === 'production',
           drop_debugger: true,
           pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : [],
-          passes: 3,
+          passes: 2,
           arrows: true,
           arguments: true,
           booleans: true,
@@ -36,12 +36,21 @@ export default defineConfig(({ mode }) => {
           reduce_vars: true,
           unused: true,
           collapse_vars: true,
-          inline: 2,
-          side_effects: true
+          inline: 3,
+          side_effects: true,
+          toplevel: true,
+          unsafe: true,
+          unsafe_arrows: true,
+          unsafe_comps: true,
+          unsafe_math: true,
+          unsafe_proto: true
         },
         mangle: {
           safari10: true,
-          toplevel: true
+          toplevel: true,
+          properties: {
+            regex: /^_/
+          }
         },
         format: {
           comments: false,
@@ -113,16 +122,22 @@ export default defineConfig(({ mode }) => {
           },
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
-          experimentalMinChunkSize: 10000,
-          compact: true
+          experimentalMinChunkSize: 5000,
+          compact: true,
+          inlineDynamicImports: false
         },
         treeshake: {
           moduleSideEffects: 'no-external',
           propertyReadSideEffects: false,
-          tryCatchDeoptimization: false
+          tryCatchDeoptimization: false,
+          annotations: true
+        },
+        onwarn(warning, warn) {
+          if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
+          warn(warning);
         }
       },
-      chunkSizeWarningLimit: 500,
+      chunkSizeWarningLimit: 400,
       reportCompressedSize: false,
       sourcemap: false,
       cssMinify: true
@@ -137,17 +152,24 @@ export default defineConfig(({ mode }) => {
         'date-fns/format',
         'lucide-react',
         'clsx',
-        'tailwind-merge'
+        'tailwind-merge',
+        'react-hot-toast'
       ],
-      exclude: ['emoji-picker-react'],
+      exclude: ['emoji-picker-react', 'framer-motion'],
       esbuildOptions: {
-        target: 'es2020'
+        target: 'es2020',
+        treeShaking: true,
+        minify: true
       }
     },
     server: {
       hmr: {
         overlay: false
       }
+    },
+    esbuild: {
+      logOverride: { 'this-is-undefined-in-esm': 'silent' },
+      treeShaking: true
     }
   };
 });
