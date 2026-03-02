@@ -21,8 +21,8 @@ const SemipresencialPage: React.FC<SemipresencialPageProps> = ({ darkMode, curre
   return (
     <>
       <SEO
-        title="UASD Semipresencial - Programacion Docente 2025-10 | MiSemestre"
-        description="Asignaturas semipresenciales de la UASD 2025-10. Cursos hibridos que combinan clases presenciales y virtuales. Consulta horarios y profesores de la modalidad semipresencial."
+        title="UASD Semipresencial - Programacion Docente 2026-10 | MiSemestre"
+        description="Asignaturas semipresenciales de la UASD 2026-10. Cursos hibridos que combinan clases presenciales y virtuales. Consulta horarios y profesores de la modalidad semipresencial."
         keywords="uasd semipresencial, cursos hibridos uasd, educacion semipresencial uasd, clases mixtas uasd, horarios semipresenciales, universidad hibrida"
       />
       <HomePage darkMode={darkMode} currentUser={currentUser} onOpenAuth={onOpenAuth} />

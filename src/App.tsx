@@ -172,7 +172,7 @@ function App() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-center md:text-left">
                 <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  © 2024 Nicebott. Todos los derechos reservados.
+                  © 2024-2026 Nicebott. Todos los derechos reservados.
                 </p>
                 <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                   Desarrollado con ❤️ para la comunidad estudiantil
