@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { getCurrentUserAdminStatus, getCurrentUserSuperAdminStatus, addAdmin, getAllAdmins, removeAdmin } from '../services/adminService';
 import { supabase } from '../supabase';
 import toast from 'react-hot-toast';
+import SystemMessagesPanel from './Admin/SystemMessagesPanel';
 
 interface AdminPanelProps {
   darkMode: boolean;
@@ -314,10 +315,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ darkMode }) => {
       </div>
       )}
 
+      {/* System Messages Panel */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
+        className={`mt-4 md:mt-6 p-4 md:p-6 rounded-xl ${
+          darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+        } shadow-lg`}
+      >
+        <SystemMessagesPanel darkMode={darkMode} />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
         className={`mt-4 md:mt-6 p-3 md:p-4 rounded-lg ${
           darkMode ? 'bg-yellow-900/20 border border-yellow-700' : 'bg-yellow-50 border border-yellow-200'
         }`}
@@ -333,6 +346,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ darkMode }) => {
             <ul className={`text-xs md:text-sm mt-1 space-y-1 ${darkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>
               <li>Los administradores pueden eliminar cualquier tema o mensaje en los foros</li>
               <li>Los administradores pueden eliminar cualquier resena de profesores</li>
+              <li>Los administradores pueden enviar mensajes del sistema en el chat</li>
               {isSuperAdmin && (
                 <>
                   <li>Solo los SuperAdmins pueden agregar o eliminar administradores</li>
