@@ -139,7 +139,7 @@ export default defineConfig(({ mode }) => {
       },
       chunkSizeWarningLimit: 400,
       reportCompressedSize: false,
-      sourcemap: false,
+      sourcemap: mode === 'production' ? 'hidden' : true,
       cssMinify: true
     },
     optimizeDeps: {
