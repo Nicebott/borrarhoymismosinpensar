@@ -93,7 +93,6 @@ const Navigation: React.FC<NavigationProps> = ({
           {!user ? (
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              aria-label="Iniciar sesión"
               className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm ${
                 darkMode
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
@@ -108,9 +107,6 @@ const Navigation: React.FC<NavigationProps> = ({
             <div className="static sm:relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                aria-label={`Perfil de ${user.displayName || 'Usuario'}`}
-                aria-expanded={showProfileDropdown}
-                aria-haspopup="true"
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm ${
                   darkMode
                     ? 'bg-gray-700 text-white hover:bg-gray-600'
@@ -136,7 +132,7 @@ const Navigation: React.FC<NavigationProps> = ({
           <button
             onClick={toggleDarkMode}
             className={`p-1.5 rounded-full ${
-              darkMode ? 'bg-gray-700 text-yellow-400' : 'bg-gray-200 text-gray-700'
+              darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-600'
             } hover:opacity-80 transition-all duration-200`}
             aria-label={darkMode ? 'Activar modo claro' : 'Activar modo oscuro'}
           >
@@ -144,13 +140,7 @@ const Navigation: React.FC<NavigationProps> = ({
           </button>
 
           {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-1.5"
-            aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-navigation"
-          >
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-1.5">
             {isMenuOpen ? (
               <X size={20} className={darkMode ? 'text-white' : ''} />
             ) : (
@@ -161,8 +151,6 @@ const Navigation: React.FC<NavigationProps> = ({
 
         {/* Nav links */}
         <nav
-          id="mobile-navigation"
-          aria-label="Navegación principal"
           className={`${
             isMenuOpen ? 'fixed top-16 left-0 right-0 bottom-0 overflow-y-auto' : 'hidden'
           } md:block md:static md:w-auto md:shadow-none md:mt-0 md:overflow-visible ${
