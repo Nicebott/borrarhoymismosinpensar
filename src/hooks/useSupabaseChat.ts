@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabase';
 import { Message } from '../types';
-import { usePageVisibility } from './usePageVisibility';
 
 const MESSAGES_PER_PAGE = 50;
 const LAST_SEEN_KEY = 'chat_last_seen_timestamp';
@@ -10,18 +9,6 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
-  const channelRef = useRef<any>(null);
-  const isVisibleRef = useRef(true);
-
-  // Handle page visibility changes for bfcache compatibility
-  usePageVisibility((isVisible) => {
-    isVisibleRef.current = isVisible;
-
-    // Reconnect when page becomes visible again
-    if (isVisible && isOpen && channelRef.current) {
-      channelRef.current.subscribe();
-    }
-  });
 
   // Fetch messages & subscribe to realtime
   useEffect(() => {
@@ -88,17 +75,7 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
 
       // Realtime subscription for chat messages
       const channel = supabase
-        .channel('chat-messages', {
-          config: {
-            broadcast: { self: false },
-            presence: { key: userId }
-          }
-        })
-
-      // Store channel reference for reconnection
-      channelRef.current = channel;
-
-      channel
+        .channel('chat-messages')
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'chat_messages' },
@@ -172,10 +149,7 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
       return () => {
         // Update last seen timestamp when closing chat
         localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
-        if (channelRef.current) {
-          supabase.removeChannel(channelRef.current);
-          channelRef.current = null;
-        }
+        supabase.removeChannel(channel);
       };
     } else {
       // When chat is closed, track unread count based on last seen timestamp
