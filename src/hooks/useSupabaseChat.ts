@@ -5,7 +5,7 @@ import { usePageVisibility } from './usePageVisibility';
 
 const MESSAGES_PER_PAGE = 50;
 const LAST_SEEN_KEY = 'chat_last_seen_timestamp';
-const UNREAD_POLL_INTERVAL = 60000; // 60s polling when chat is closed
+const UNREAD_POLL_INTERVAL = 10000; // 60s polling when chat is closed
 
 export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: string, isAdmin: boolean = false) {
   const [messages, setMessages] = useState<Message[]>([]);
