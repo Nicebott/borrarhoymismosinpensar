@@ -1,40 +1,52 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabase';
 import { Message } from '../types';
+import { usePageVisibility } from './usePageVisibility';
 
 const MESSAGES_PER_PAGE = 50;
 const LAST_SEEN_KEY = 'chat_last_seen_timestamp';
+const UNREAD_POLL_INTERVAL = 60000; // 60s polling when chat is closed
 
 export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: string, isAdmin: boolean = false) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const channelRef = useRef<any>(null);
+  const isVisibleRef = useRef(true);
 
-  // Fetch messages & subscribe to realtime
+  // Handle page visibility changes for bfcache compatibility
+  usePageVisibility((isVisible) => {
+    isVisibleRef.current = isVisible;
+
+    // Reconnect when page becomes visible again (only if chat is open)
+    if (isVisible && isOpen && channelRef.current) {
+      channelRef.current.subscribe();
+    }
+  });
+
+  // Fetch messages & subscribe to realtime (only when chat is open)
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
 
       const fetchMessages = async () => {
-        // Fetch regular chat messages
-        const { data: chatData, error: chatError } = await supabase
-          .from('chat_messages')
-          .select('*')
-          .order('created_at', { ascending: true })
-          .limit(MESSAGES_PER_PAGE);
-
-        // Fetch active system messages
-        const { data: systemData, error: systemError } = await supabase
-          .from('system_messages')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at', { ascending: true });
+        const [chatResult, systemResult] = await Promise.all([
+          supabase
+            .from('chat_messages')
+            .select('*')
+            .order('created_at', { ascending: true })
+            .limit(MESSAGES_PER_PAGE),
+          supabase
+            .from('system_messages')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: true }),
+        ]);
 
         const allMessages: Message[] = [];
 
-        // Add chat messages
-        if (!chatError && chatData) {
-          chatData.forEach((m) => {
+        if (!chatResult.error && chatResult.data) {
+          chatResult.data.forEach((m) => {
             allMessages.push({
               id: m.id,
               text: m.text,
@@ -45,9 +57,8 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
           });
         }
 
-        // Add system messages
-        if (!systemError && systemData) {
-          systemData.forEach((m) => {
+        if (!systemResult.error && systemResult.data) {
+          systemResult.data.forEach((m) => {
             allMessages.push({
               id: `system-${m.id}`,
               text: m.text,
@@ -60,9 +71,7 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
           });
         }
 
-        // Sort all messages by timestamp
         allMessages.sort((a, b) => a.timestamp - b.timestamp);
-
         setMessages(allMessages);
         setLoading(false);
       };
@@ -73,9 +82,17 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
       localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
       setUnreadCount(0);
 
-      // Realtime subscription for chat messages
-      const channel = supabase
-        .channel('chat-messages')
+      // Realtime subscription — only active while chat is open
+      const channel = supabase.channel('chat-messages', {
+        config: {
+          broadcast: { self: false },
+          presence: { key: userId },
+        },
+      });
+
+      channelRef.current = channel;
+
+      channel
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'chat_messages' },
@@ -91,7 +108,6 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
                 isAdmin: m.is_admin,
               },
             ]);
-            // Update last seen timestamp when viewing new messages
             localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
           }
         )
@@ -130,7 +146,9 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
           { event: 'DELETE', schema: 'public', table: 'system_messages' },
           (payload) => {
             const deletedId = (payload.old as any).id;
-            setMessages((prev) => prev.filter((msg) => msg.id !== `system-${deletedId}`));
+            setMessages((prev) =>
+              prev.filter((msg) => msg.id !== `system-${deletedId}`)
+            );
           }
         )
         .on(
@@ -139,23 +157,28 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
           (payload) => {
             const m = payload.new as any;
             if (!m.is_active) {
-              // Remove system message if deactivated
-              setMessages((prev) => prev.filter((msg) => msg.id !== `system-${m.id}`));
+              setMessages((prev) =>
+                prev.filter((msg) => msg.id !== `system-${m.id}`)
+              );
             }
           }
         )
         .subscribe();
 
       return () => {
-        // Update last seen timestamp when closing chat
         localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
-        supabase.removeChannel(channel);
+        if (channelRef.current) {
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
       };
     } else {
-      // When chat is closed, track unread count based on last seen timestamp
+      // Chat is closed — use polling instead of a persistent WebSocket
+      // This fixes the bfcache block reported by Lighthouse
       const fetchUnread = async () => {
         const lastSeen = localStorage.getItem(LAST_SEEN_KEY);
-        const cutoffTime = lastSeen || new Date(Date.now() - 300000).toISOString();
+        const cutoffTime =
+          lastSeen || new Date(Date.now() - 300000).toISOString();
 
         const { count } = await supabase
           .from('chat_messages')
@@ -166,23 +189,11 @@ export function useSupabaseChat(isOpen: boolean, displayName: string, userId?: s
       };
 
       fetchUnread();
+      const interval = setInterval(fetchUnread, UNREAD_POLL_INTERVAL);
 
-      const channel = supabase
-        .channel('chat-unread')
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-          () => {
-            setUnreadCount((prev) => prev + 1);
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
+      return () => clearInterval(interval); // no open connections = bfcache works
     }
-  }, [isOpen]);
+  }, [isOpen, userId]);
 
   const sendMessage = useCallback(
     async (text: string) => {
