@@ -148,9 +148,9 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
   return (
     <>
       <SEO
-        title="MiSemestre - Programacion Docente UASD 2026-10 | Horarios y Asignaturas"
-        description="Consulta la programacion docente UASD 2026-10. Busca asignaturas, horarios, profesores y NRC por campus. Modalidades presencial, virtual y semipresencial disponibles."
-        keywords="programacion docente uasd, horarios uasd 2026-10, asignaturas uasd, nrc uasd, profesores uasd, universidad autonoma santo domingo, inscripciones uasd, calendario academico"
+        title="MiSemestre - Programacion Docente UASD 2025-10 | Horarios y Asignaturas"
+        description="Consulta la programacion docente UASD 2025-10. Busca asignaturas, horarios, profesores y NRC por campus. Modalidades presencial, virtual y semipresencial disponibles."
+        keywords="programacion docente uasd, horarios uasd 2025-10, asignaturas uasd, nrc uasd, profesores uasd, universidad autonoma santo domingo, inscripciones uasd, calendario academico"
       />
       <div className="flex flex-col items-center">
       <div className="w-full max-w-4xl text-center mb-8">
@@ -168,7 +168,7 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
         <p className={`text-lg ${
           darkMode ? 'text-gray-300' : 'text-gray-600'
         }`}>
-          Encuentra y explora las asignaturas disponibles para el semestre 2026-10
+          Encuentra y explora las asignaturas disponibles para el semestre 2025-10
         </p>
       </div>
 

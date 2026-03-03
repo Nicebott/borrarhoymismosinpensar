@@ -1,30 +1,28 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense, useCallback, memo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import Navigation from './components/Navigation';
+import Chat from './components/Chat';
+import AuthModal from './components/AuthModal';
+import TermsModal from './components/Chat/TermsModal';
+import PrivacyModal from './components/Chat/PrivacyModal';
 import LoadingSpinner from './components/LoadingSpinner';
 import { useAuthContext } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import { checkIsAdmin, checkIsSuperAdmin } from './services/adminService';
 
-// Lazy load page components with chunk names
-const HomePage = lazy(() => import(/* webpackChunkName: "home" */ './pages/HomePage'));
-const FAQPage = lazy(() => import(/* webpackChunkName: "faq" */ './pages/FAQPage'));
-const ForumPage = lazy(() => import(/* webpackChunkName: "forum" */ './pages/ForumPage'));
-const AdminPage = lazy(() => import(/* webpackChunkName: "admin" */ './pages/AdminPage'));
-const VirtualPage = lazy(() => import(/* webpackChunkName: "virtual" */ './pages/VirtualPage'));
-const SemipresencialPage = lazy(() => import(/* webpackChunkName: "semipresencial" */ './pages/SemipresencialPage'));
-const TermsPage = lazy(() => import(/* webpackChunkName: "terms" */ './pages/TermsPage'));
-const PrivacyPage = lazy(() => import(/* webpackChunkName: "privacy" */ './pages/PrivacyPage'));
-const ProfilePage = lazy(() => import(/* webpackChunkName: "profile" */ './pages/ProfilePage'));
-const CommunityRulesPage = lazy(() => import(/* webpackChunkName: "rules" */ './pages/CommunityRulesPage'));
+// Lazy load page components
+const HomePage = lazy(() => import('./pages/HomePage'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
+const ForumPage = lazy(() => import('./pages/ForumPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const VirtualPage = lazy(() => import('./pages/VirtualPage'));
+const SemipresencialPage = lazy(() => import('./pages/SemipresencialPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const CommunityRulesPage = lazy(() => import('./pages/CommunityRulesPage'));
 
-// Lazy load heavy components
-const Chat = lazy(() => import(/* webpackChunkName: "chat" */ './components/Chat'));
-const AuthModal = lazy(() => import(/* webpackChunkName: "auth-modal" */ './components/AuthModal'));
-const TermsModal = lazy(() => import(/* webpackChunkName: "terms-modal" */ './components/Chat/TermsModal'));
-const PrivacyModal = lazy(() => import(/* webpackChunkName: "privacy-modal" */ './components/Chat/PrivacyModal'));
-
-const App = memo(() => {
+function App() {
   const { user } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
@@ -81,16 +79,7 @@ const App = memo(() => {
 
   return (
     <div className={`min-h-screen flex flex-col ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: darkMode ? '#1f2937' : '#ffffff',
-              color: darkMode ? '#f3f4f6' : '#111827',
-            },
-          }}
-        />
+        <Toaster position="top-center" />
 
         <Navigation
           isMenuOpen={isMenuOpen}
@@ -183,7 +172,7 @@ const App = memo(() => {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-center md:text-left">
                 <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  © 2024-2026 Nicebott. Todos los derechos reservados.
+                  © 2024 Nicebott. Todos los derechos reservados.
                 </p>
                 <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                   Desarrollado con ❤️ para la comunidad estudiantil
@@ -213,44 +202,28 @@ const App = memo(() => {
           </div>
         </footer>
 
-        <Suspense fallback={null}>
-          <Chat darkMode={darkMode} onOpenAuth={handleOpenAuth} />
-        </Suspense>
+        <Chat darkMode={darkMode} onOpenAuth={handleOpenAuth} />
 
-        {isAuthModalOpen && (
-          <Suspense fallback={null}>
-            <AuthModal
-              isOpen={isAuthModalOpen}
-              onClose={() => setIsAuthModalOpen(false)}
-              darkMode={darkMode}
-            />
-          </Suspense>
-        )}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          darkMode={darkMode}
+        />
 
-        {showTermsModal && (
-          <Suspense fallback={null}>
-            <TermsModal
-              isOpen={showTermsModal}
-              onClose={() => setShowTermsModal(false)}
-              darkMode={darkMode}
-            />
-          </Suspense>
-        )}
+        <TermsModal
+          isOpen={showTermsModal}
+          onClose={() => setShowTermsModal(false)}
+          darkMode={darkMode}
+        />
 
-        {showPrivacyModal && (
-          <Suspense fallback={null}>
-            <PrivacyModal
-              isOpen={showPrivacyModal}
-              onClose={() => setShowPrivacyModal(false)}
-              darkMode={darkMode}
-            />
-          </Suspense>
-        )}
+        <PrivacyModal
+          isOpen={showPrivacyModal}
+          onClose={() => setShowPrivacyModal(false)}
+          darkMode={darkMode}
+        />
       </div>
   );
-});
-
-App.displayName = 'App';
+}
 
 interface FooterLinkProps {
   to: string;

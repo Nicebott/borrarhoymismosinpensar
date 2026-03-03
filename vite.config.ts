@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
           drop_console: mode === 'production',
           drop_debugger: true,
           pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : [],
-          passes: 2,
+          passes: 3,
           arrows: true,
           arguments: true,
           booleans: true,
@@ -36,37 +36,29 @@ export default defineConfig(({ mode }) => {
           reduce_vars: true,
           unused: true,
           collapse_vars: true,
-          inline: 3,
-          side_effects: true,
-          toplevel: true,
-          unsafe: true,
-          unsafe_arrows: true,
-          unsafe_comps: true,
-          unsafe_math: true,
-          unsafe_proto: true
+          inline: true
         },
         mangle: {
           safari10: true,
-          toplevel: true,
-          properties: {
-            regex: /^_/
-          }
+          toplevel: true
         },
         format: {
-          comments: false,
-          ecma: 2020
+          comments: false
         }
       },
       rollupOptions: {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
-              // Core React libs - keep together
-              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
-                return 'react-vendor';
+              // Split React into smaller chunks
+              if (id.includes('react-dom')) {
+                return 'react-dom';
+              }
+              if (id.includes('react/') && !id.includes('react-dom')) {
+                return 'react';
               }
               if (id.includes('react-router')) {
-                return 'router';
+                return 'react-router';
               }
               if (id.includes('@supabase')) {
                 return 'supabase';
@@ -75,46 +67,38 @@ export default defineConfig(({ mode }) => {
                 return 'framer';
               }
               if (id.includes('emoji-picker-react')) {
-                return 'emoji';
+                return 'emoji-picker';
               }
               if (id.includes('lucide-react')) {
                 return 'icons';
               }
               if (id.includes('date-fns')) {
-                return 'date-fns';
+                return 'date';
               }
               if (id.includes('react-hot-toast')) {
                 return 'toast';
               }
-              if (id.includes('clsx') || id.includes('tailwind-merge')) {
-                return 'utils';
-              }
               return 'vendor';
             }
-
-            // Split pages individually
+            // Split large component groups
             if (id.includes('src/pages/')) {
-              const match = id.match(/pages\/(\w+)Page/);
-              if (match) return `page-${match[1].toLowerCase()}`;
               return 'pages';
             }
-
-            // Component groups
-            if (id.includes('src/components/Forum/')) return 'comp-forum';
-            if (id.includes('src/components/Chat/')) return 'comp-chat';
-            if (id.includes('src/components/Reviews/')) return 'comp-reviews';
-            if (id.includes('src/components/Admin/')) return 'comp-admin';
-            if (id.includes('src/components/Auth/')) return 'comp-auth';
-
-            // Services and contexts
-            if (id.includes('src/services/')) return 'services';
-            if (id.includes('src/contexts/')) return 'contexts';
+            if (id.includes('src/components/Forum/')) {
+              return 'forum';
+            }
+            if (id.includes('src/components/Chat/')) {
+              return 'chat';
+            }
+            if (id.includes('src/components/Reviews/')) {
+              return 'reviews';
+            }
           },
           assetFileNames: (assetInfo) => {
             const info = assetInfo.name.split('.');
             const ext = info[info.length - 1];
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
-              return `assets/img/[name]-[hash][extname]`;
+              return `assets/images/[name]-[hash][extname]`;
             } else if (/woff|woff2/.test(ext)) {
               return `assets/fonts/[name]-[hash][extname]`;
             }
@@ -122,25 +106,12 @@ export default defineConfig(({ mode }) => {
           },
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
-          experimentalMinChunkSize: 5000,
-          compact: true,
-          inlineDynamicImports: false
-        },
-        treeshake: {
-          moduleSideEffects: 'no-external',
-          propertyReadSideEffects: false,
-          tryCatchDeoptimization: false,
-          annotations: true
-        },
-        onwarn(warning, warn) {
-          if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
-          warn(warning);
+          experimentalMinChunkSize: 15000
         }
       },
-      chunkSizeWarningLimit: 400,
+      chunkSizeWarningLimit: 600,
       reportCompressedSize: false,
-      sourcemap: false,
-      cssMinify: true
+      sourcemap: false
     },
     optimizeDeps: {
       include: [
@@ -148,28 +119,15 @@ export default defineConfig(({ mode }) => {
         'react-dom',
         'react-router-dom',
         '@supabase/supabase-js',
-        'date-fns/formatDistanceToNow',
-        'date-fns/format',
-        'lucide-react',
-        'clsx',
-        'tailwind-merge',
-        'react-hot-toast'
+        'date-fns',
+        'lucide-react'
       ],
-      exclude: ['emoji-picker-react', 'framer-motion'],
-      esbuildOptions: {
-        target: 'es2020',
-        treeShaking: true,
-        minify: true
-      }
+      exclude: ['emoji-picker-react', 'framer-motion']
     },
     server: {
       hmr: {
         overlay: false
       }
-    },
-    esbuild: {
-      logOverride: { 'this-is-undefined-in-esm': 'silent' },
-      treeShaking: true
     }
   };
 });
