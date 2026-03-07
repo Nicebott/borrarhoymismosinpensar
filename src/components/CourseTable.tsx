@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback, Suspense } from 'react';
 import { Course, Section } from '../types';
 import { Search, Star, BookOpen, MapPin, Clock, Users, Globe } from 'lucide-react';
-import ProfessorDetailsModal from './ProfessorDetailsModal';
-import ReviewModal from './ReviewModal';
 import { supabase } from '../supabase';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from './ui/Card';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
-import Tooltip from './ui/Tooltip';
+
+// Lazy load modals to reduce initial bundle size
+const ProfessorDetailsModal = React.lazy(() => import('./ProfessorDetailsModal'));
+const ReviewModal = React.lazy(() => import('./ReviewModal'));
 
 interface ProfessorRating {
   rating: number;
@@ -26,24 +26,148 @@ interface CourseTableProps {
   currentUser: { id: string; displayName: string; email: string } | null;
 }
 
+const CourseCard = memo<{
+  section: Section;
+  course: Course;
+  rating: ProfessorRating | undefined;
+  darkMode: boolean;
+  onDetailsClick: (professor: { id: string; name: string }) => void;
+  onRateClick: (sectionId: string, professorId: string) => void;
+  getModalityBadge: (modalidad: string) => JSX.Element;
+}>(({ section, course, rating, darkMode, onDetailsClick, onRateClick, getModalityBadge }) => (
+  <Card className={`${darkMode ? 'border-gray-700' : 'border-gray-200'} hover:shadow-lg transition-shadow duration-200`}>
+    <CardContent className="p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              {course.name}
+            </h3>
+            {getModalityBadge(section.modalidad)}
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center text-sm">
+              <BookOpen size={16} className="mr-2 text-blue-500" />
+              <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
+                {course.code} - NRC: {section.nrc}
+              </span>
+            </div>
+            <div className="flex items-center text-sm">
+              <MapPin size={16} className="mr-2 text-green-500" />
+              <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
+                {section.campus}
+              </span>
+              <Clock size={16} className="ml-4 mr-2 text-purple-500" />
+              <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
+                {section.schedule}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Star size={16} className="mr-2 text-yellow-500" />
+              <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                {section.professor}
+              </span>
+            </div>
+            {rating && (
+              <Badge
+                variant={rating.rating >= 8 ? 'success' : rating.rating >= 6 ? 'warning' : 'error'}
+                size="sm"
+              >
+                {rating.rating.toFixed(1)}
+              </Badge>
+            )}
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onDetailsClick({
+                id: section.professor,
+                name: section.professor
+              })}
+              className="flex-1"
+            >
+              <Search size={14} className="mr-1" />
+              Detalles
+            </Button>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => onRateClick(section.id, section.professor)}
+              className="flex-1"
+            >
+              <Star size={14} className="mr-1" />
+              Calificar
+            </Button>
+          </div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+));
+
+CourseCard.displayName = 'CourseCard';
+
 const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSection, darkMode, currentUser }) => {
   const [selectedProfessor, setSelectedProfessor] = useState<{ id: string; name: string } | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [professorRatings, setProfessorRatings] = useState<Record<string, ProfessorRating>>({});
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProfessorRatings = async () => {
       const uniqueProfessors = [...new Set(sections.map(section => section.professor))];
+
+      if (uniqueProfessors.length === 0) {
+        return;
+      }
+
+      // Split into batches of 100 to avoid query size limits
+      const batchSize = 100;
+      const batches = [];
+      for (let i = 0; i < uniqueProfessors.length; i += batchSize) {
+        batches.push(uniqueProfessors.slice(i, i + batchSize));
+      }
+
       const ratings: Record<string, ProfessorRating> = {};
 
-      for (const professor of uniqueProfessors) {
-        try {
-          const { data: reviews, error } = await supabase
+      try {
+        // Fetch all batches in parallel
+        const batchPromises = batches.map(batch =>
+          supabase
             .from('reviews')
-            .select('rating, clarity, fairness, punctuality, would_take_again')
-            .eq('professor_id', professor);
+            .select('professor_id, rating, clarity, fairness, punctuality, would_take_again')
+            .in('professor_id', batch)
+        );
 
-          if (!error && reviews && reviews.length > 0) {
+        const results = await Promise.all(batchPromises);
+
+        if (!isMounted) return;
+
+        // Process all results
+        const allReviews = results.flatMap(result => result.data || []);
+
+        // Group reviews by professor
+        const reviewsByProfessor: Record<string, typeof allReviews> = {};
+
+        allReviews.forEach(review => {
+          if (!reviewsByProfessor[review.professor_id]) {
+            reviewsByProfessor[review.professor_id] = [];
+          }
+          reviewsByProfessor[review.professor_id].push(review);
+        });
+
+        // Calculate averages for each professor
+        Object.entries(reviewsByProfessor).forEach(([professor, reviews]) => {
+          if (reviews.length > 0) {
             const totals = reviews.reduce((acc, review) => ({
               rating: acc.rating + review.rating,
               clarity: acc.clarity + (review.clarity || 0),
@@ -67,27 +191,39 @@ const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSect
               wouldTakeAgain: Number((totals.wouldTakeAgain / count).toFixed(1))
             };
           }
-        } catch (error) {
-          console.error('Error fetching ratings for professor:', professor, error);
+        });
+
+        if (isMounted) {
+          setProfessorRatings(ratings);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error fetching ratings:', error);
         }
       }
-
-      setProfessorRatings(ratings);
     };
 
     fetchProfessorRatings();
+
+    return () => {
+      isMounted = false;
+    };
   }, [sections]);
 
-  const handleRateClick = (sectionId: string, professorId: string) => {
+  const handleRateClick = useCallback((sectionId: string, professorId: string) => {
     if (!currentUser) {
       onRateSection(sectionId);
       return;
     }
     setSelectedProfessor({ id: professorId, name: professorId });
     setShowReviewModal(true);
-  };
+  }, [currentUser, onRateSection]);
 
-  const getModalityBadge = (modalidad: string) => {
+  const handleDetailsClick = useCallback((professor: { id: string; name: string }) => {
+    setSelectedProfessor(professor);
+  }, []);
+
+  const getModalityBadge = useCallback((modalidad: string) => {
     const modalidadLower = modalidad.toLowerCase();
     if (modalidadLower.includes('online') || modalidadLower.includes('virtual')) {
       return (
@@ -111,137 +247,66 @@ const CourseTable: React.FC<CourseTableProps> = ({ courses, sections, onRateSect
         Presencial
       </Badge>
     );
-  };
+  }, []);
+
+  const courseMap = useMemo(() => {
+    const map = new Map<string, Course>();
+    courses.forEach(course => map.set(course.id, course));
+    return map;
+  }, [courses]);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-8 auto-rows-max">
-      <AnimatePresence mode="popLayout">
-        {sections.map((section, index) => {
-          const course = courses.find(c => c.id === section.courseId);
-          if (!course) return null;
+      {sections.map((section, index) => {
+        const course = courseMap.get(section.courseId);
+        if (!course) return null;
 
-          const rating = professorRatings[section.professor];
+        const rating = professorRatings[section.professor];
 
-          return (
-            <motion.div
-              key={`${section.id}-${section.nrc}-${section.professor}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <Card className={`${darkMode ? 'border-gray-700' : 'border-gray-200'} hover:shadow-lg transition-shadow duration-200`}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                          {course.name}
-                        </h3>
-                        {getModalityBadge(section.modalidad)}
-                      </div>
-                      <div className="space-y-2">
-                        <Tooltip content="Codigo y NRC del curso">
-                          <div className="flex items-center text-sm">
-                            <BookOpen size={16} className="mr-2 text-blue-500" />
-                            <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                              {course.code} - NRC: {section.nrc}
-                            </span>
-                          </div>
-                        </Tooltip>
-                        <Tooltip content="Campus y Horario">
-                          <div className="flex items-center text-sm">
-                            <MapPin size={16} className="mr-2 text-green-500" />
-                            <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                              {section.campus}
-                            </span>
-                            <Clock size={16} className="ml-4 mr-2 text-purple-500" />
-                            <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                              {section.schedule}
-                            </span>
-                          </div>
-                        </Tooltip>
-                      </div>
-                    </div>
-                  </div>
+        return (
+          <div key={`${section.id}-${section.nrc}-${section.professor}`}>
+            <CourseCard
+              section={section}
+              course={course}
+              rating={rating}
+              darkMode={darkMode}
+              onDetailsClick={handleDetailsClick}
+              onRateClick={handleRateClick}
+              getModalityBadge={getModalityBadge}
+            />
+          </div>
+        );
+      })}
 
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex flex-col space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <Star size={16} className="mr-2 text-yellow-500" />
-                          <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                            {section.professor}
-                          </span>
-                        </div>
-                        {rating && (
-                          <Badge
-                            variant={rating.rating >= 8 ? 'success' : rating.rating >= 6 ? 'warning' : 'error'}
-                            size="sm"
-                          >
-                            {rating.rating.toFixed(1)}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedProfessor({
-                            id: section.professor,
-                            name: section.professor
-                          })}
-                          className="flex-1"
-                        >
-                          <Search size={14} className="mr-1" />
-                          Detalles
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          onClick={() => handleRateClick(section.id, section.professor)}
-                          className="flex-1"
-                        >
-                          <Star size={14} className="mr-1" />
-                          Calificar
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+      <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-50 z-50" />}>
+        {selectedProfessor && !showReviewModal && (
+          <ProfessorDetailsModal
+            key={`details-${selectedProfessor.id}`}
+            isOpen={!!selectedProfessor}
+            onClose={() => setSelectedProfessor(null)}
+            darkMode={darkMode}
+            professorId={selectedProfessor.id}
+            professorName={selectedProfessor.name}
+            currentUser={currentUser}
+          />
+        )}
 
-      {selectedProfessor && !showReviewModal && (
-        <ProfessorDetailsModal
-          key={`details-${selectedProfessor.id}`}
-          isOpen={!!selectedProfessor}
-          onClose={() => setSelectedProfessor(null)}
-          darkMode={darkMode}
-          professorId={selectedProfessor.id}
-          professorName={selectedProfessor.name}
-          currentUser={currentUser}
-        />
-      )}
-
-      {showReviewModal && selectedProfessor && currentUser && (
-        <ReviewModal
-          key={`review-${selectedProfessor.id}`}
-          isOpen={showReviewModal}
-          onClose={() => {
-            setShowReviewModal(false);
-            setSelectedProfessor(null);
-          }}
-          darkMode={darkMode}
-          professorId={selectedProfessor.id}
-          professorName={selectedProfessor.name}
-          userId={currentUser.id}
-          userName={currentUser.displayName}
-        />
-      )}
+        {showReviewModal && selectedProfessor && currentUser && (
+          <ReviewModal
+            key={`review-${selectedProfessor.id}`}
+            isOpen={showReviewModal}
+            onClose={() => {
+              setShowReviewModal(false);
+              setSelectedProfessor(null);
+            }}
+            darkMode={darkMode}
+            professorId={selectedProfessor.id}
+            professorName={selectedProfessor.name}
+            userId={currentUser.id}
+            userName={currentUser.displayName}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };

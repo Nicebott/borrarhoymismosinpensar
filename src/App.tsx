@@ -1,23 +1,26 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Chat from './components/Chat';
 import AuthModal from './components/AuthModal';
 import TermsModal from './components/Chat/TermsModal';
 import PrivacyModal from './components/Chat/PrivacyModal';
-import HomePage from './pages/HomePage';
-import FAQPage from './pages/FAQPage';
-import ForumPage from './pages/ForumPage';
-import AdminPage from './pages/AdminPage';
-import VirtualPage from './pages/VirtualPage';
-import SemipresencialPage from './pages/SemipresencialPage';
-import TermsPage from './pages/TermsPage';
-import PrivacyPage from './pages/PrivacyPage';
-import ProfilePage from './pages/ProfilePage';
-import CommunityRulesPage from './pages/CommunityRulesPage';
+import LoadingSpinner from './components/LoadingSpinner';
 import { useAuthContext } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import { checkIsAdmin, checkIsSuperAdmin } from './services/adminService';
+
+// Lazy load page components
+const HomePage = lazy(() => import('./pages/HomePage'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
+const ForumPage = lazy(() => import('./pages/ForumPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const VirtualPage = lazy(() => import('./pages/VirtualPage'));
+const SemipresencialPage = lazy(() => import('./pages/SemipresencialPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const CommunityRulesPage = lazy(() => import('./pages/CommunityRulesPage'));
 
 function App() {
   const { user } = useAuthContext();
@@ -50,18 +53,21 @@ function App() {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
   }, [darkMode]);
 
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user) {
-        const isAdmin = await checkIsAdmin(user.id);
-        const isSuperAdmin = await checkIsSuperAdmin(user.id);
-        setIsUserAdmin(isAdmin || isSuperAdmin);
-      } else {
-        setIsUserAdmin(false);
-      }
-    };
-    checkAdminStatus();
+  const checkAdminStatus = useCallback(async () => {
+    if (user) {
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        checkIsAdmin(user.id),
+        checkIsSuperAdmin(user.id)
+      ]);
+      setIsUserAdmin(isAdmin || isSuperAdmin);
+    } else {
+      setIsUserAdmin(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    checkAdminStatus();
+  }, [checkAdminStatus]);
 
   const toggleDarkMode = () => {
     setDarkMode((prev: boolean) => !prev);
@@ -87,75 +93,81 @@ function App() {
           isUserAdmin={isUserAdmin}
         />
 
-        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <HomePage
-                  darkMode={darkMode}
-                  currentUser={currentUser}
-                  onOpenAuth={handleOpenAuth}
-                />
-              }
-            />
-            <Route
-              path="/virtual"
-              element={
-                <VirtualPage
-                  darkMode={darkMode}
-                  currentUser={currentUser}
-                  onOpenAuth={handleOpenAuth}
-                />
-              }
-            />
-            <Route
-              path="/semipresencial"
-              element={
-                <SemipresencialPage
-                  darkMode={darkMode}
-                  currentUser={currentUser}
-                  onOpenAuth={handleOpenAuth}
-                />
-              }
-            />
-            <Route
-              path="/faq"
-              element={<FAQPage darkMode={darkMode} />}
-            />
-            <Route
-              path="/foro"
-              element={
-                <ForumPage
-                  darkMode={darkMode}
-                  onOpenAuth={handleOpenAuth}
-                />
-              }
-            />
-            <Route
-              path="/admin"
-              element={<AdminPage darkMode={darkMode} />}
-            />
-            <Route
-              path="/terms"
-              element={<TermsPage darkMode={darkMode} />}
-            />
-            <Route
-              path="/privacy"
-              element={<PrivacyPage darkMode={darkMode} />}
-            />
-            <Route
-              path="/perfil"
-              element={<ProfilePage darkMode={darkMode} />}
-            />
-            <Route
-              path="/community-rules"
-              element={<CommunityRulesPage darkMode={darkMode} />}
-            />
-          </Routes>
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow min-h-[calc(100vh-144px)]">
+          <Suspense fallback={
+            <div className="min-h-[600px] flex items-center justify-center">
+              <LoadingSpinner darkMode={darkMode} message="Cargando..." />
+            </div>
+          }>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <HomePage
+                    darkMode={darkMode}
+                    currentUser={currentUser}
+                    onOpenAuth={handleOpenAuth}
+                  />
+                }
+              />
+              <Route
+                path="/virtual"
+                element={
+                  <VirtualPage
+                    darkMode={darkMode}
+                    currentUser={currentUser}
+                    onOpenAuth={handleOpenAuth}
+                  />
+                }
+              />
+              <Route
+                path="/semipresencial"
+                element={
+                  <SemipresencialPage
+                    darkMode={darkMode}
+                    currentUser={currentUser}
+                    onOpenAuth={handleOpenAuth}
+                  />
+                }
+              />
+              <Route
+                path="/faq"
+                element={<FAQPage darkMode={darkMode} />}
+              />
+              <Route
+                path="/foro"
+                element={
+                  <ForumPage
+                    darkMode={darkMode}
+                    onOpenAuth={handleOpenAuth}
+                  />
+                }
+              />
+              <Route
+                path="/admin"
+                element={<AdminPage darkMode={darkMode} />}
+              />
+              <Route
+                path="/terms"
+                element={<TermsPage darkMode={darkMode} />}
+              />
+              <Route
+                path="/privacy"
+                element={<PrivacyPage darkMode={darkMode} />}
+              />
+              <Route
+                path="/perfil"
+                element={<ProfilePage darkMode={darkMode} />}
+              />
+              <Route
+                path="/community-rules"
+                element={<CommunityRulesPage darkMode={darkMode} />}
+              />
+            </Routes>
+          </Suspense>
         </main>
 
-        <footer className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md mt-auto`}>
+        <footer className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md mt-auto min-h-[72px]`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-center md:text-left">
