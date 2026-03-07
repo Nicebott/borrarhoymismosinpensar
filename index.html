@@ -13,8 +13,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-
-    <!-- Manifest cargado con baja prioridad para no bloquear el critical path -->
     <link rel="manifest" href="/site.webmanifest" fetchpriority="low" />
 
     <title>MiSemestre</title>
@@ -55,6 +53,135 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MiSemestre" />
+
+    <!-- Skeleton styles: se muestran instantáneamente antes de que React cargue -->
+    <style>
+      #app-skeleton {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background: #111827;
+        font-family: sans-serif;
+      }
+
+      /* Navbar skeleton */
+      #app-skeleton .sk-nav {
+        height: 64px;
+        background: #1f2937;
+        border-bottom: 1px solid #374151;
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 12px;
+      }
+      #app-skeleton .sk-nav-logo {
+        width: 120px;
+        height: 20px;
+        background: #374151;
+        border-radius: 4px;
+      }
+
+      /* Main content skeleton */
+      #app-skeleton .sk-main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 48px 16px;
+        gap: 16px;
+        flex: 1;
+      }
+
+      /* Icon circle */
+      #app-skeleton .sk-icon {
+        width: 64px;
+        height: 64px;
+        background: #1d4ed8;
+        border-radius: 50%;
+        opacity: 0.4;
+      }
+
+      /* Title skeleton - replica exacta del h1 */
+      #app-skeleton .sk-title {
+        width: 340px;
+        height: 40px;
+        background: #374151;
+        border-radius: 8px;
+      }
+
+      /* Subtitle skeleton */
+      #app-skeleton .sk-subtitle {
+        width: 420px;
+        height: 20px;
+        background: #374151;
+        border-radius: 8px;
+        opacity: 0.6;
+        max-width: 90vw;
+      }
+
+      /* Search bar skeleton */
+      #app-skeleton .sk-search {
+        display: flex;
+        gap: 12px;
+        width: 100%;
+        max-width: 896px;
+        margin-top: 8px;
+      }
+      #app-skeleton .sk-search-input {
+        flex: 1;
+        height: 48px;
+        background: #1f2937;
+        border: 1px solid #374151;
+        border-radius: 8px;
+      }
+      #app-skeleton .sk-search-select {
+        width: 160px;
+        height: 48px;
+        background: #1f2937;
+        border: 1px solid #374151;
+        border-radius: 8px;
+      }
+      #app-skeleton .sk-search-btn {
+        width: 100px;
+        height: 48px;
+        background: #1d4ed8;
+        border-radius: 8px;
+        opacity: 0.7;
+      }
+
+      /* Cards grid skeleton */
+      #app-skeleton .sk-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        width: 100%;
+        max-width: 1200px;
+        margin-top: 16px;
+      }
+      #app-skeleton .sk-card {
+        height: 200px;
+        background: #1f2937;
+        border: 1px solid #374151;
+        border-radius: 12px;
+      }
+
+      /* Shimmer animation */
+      @keyframes shimmer {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
+      }
+      #app-skeleton .sk-title,
+      #app-skeleton .sk-subtitle,
+      #app-skeleton .sk-nav-logo,
+      #app-skeleton .sk-card {
+        animation: shimmer 1.5s ease-in-out infinite;
+      }
+
+      /* Ocultar skeleton cuando React ya montó */
+      #root:not(:empty) #app-skeleton {
+        display: none;
+      }
+    </style>
 
     <script type="application/ld+json">
     {
@@ -113,7 +240,42 @@
     </script>
   </head>
   <body class="notranslate">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Skeleton visible instantáneamente mientras React carga.
+           Desaparece automáticamente cuando React monta el contenido real. -->
+      <div id="app-skeleton">
+
+        <!-- Navbar -->
+        <div class="sk-nav">
+          <div class="sk-nav-logo"></div>
+        </div>
+
+        <!-- Main -->
+        <div class="sk-main">
+          <div class="sk-icon"></div>
+          <div class="sk-title"></div>
+          <div class="sk-subtitle"></div>
+
+          <!-- Search bar -->
+          <div class="sk-search">
+            <div class="sk-search-input"></div>
+            <div class="sk-search-select"></div>
+            <div class="sk-search-btn"></div>
+          </div>
+
+          <!-- Cards -->
+          <div class="sk-grid">
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
