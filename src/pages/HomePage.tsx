@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import CourseTable from '../components/CourseTable';
 import Pagination from '../components/Pagination';
-import LoadingSpinner from '../components/LoadingSpinner';
 import SkeletonCard from '../components/SkeletonCard';
 import SEO from '../components/SEO';
 import { Course, Section } from '../types';
@@ -41,6 +40,31 @@ const ALL_CAMPUSES = [
   'Yamasá'
 ];
 
+const SEO_CONFIG: Record<string, { title: string; description: string; keywords: string }> = {
+  '/virtual': {
+    title: 'UASD Virtual - Programacion Docente Online 2025-10 | MiSemestre',
+    description: 'Consulta las asignaturas virtuales de la UASD semestre 2025-10. Encuentra cursos online, horarios y profesores de la modalidad virtual.',
+    keywords: 'uasd virtual, programacion docente uasd online, asignaturas virtuales uasd, cursos online uasd, educacion a distancia uasd',
+  },
+  '/semipresencial': {
+    title: 'UASD Semipresencial - Programacion Docente 2025-10 | MiSemestre',
+    description: 'Consulta las asignaturas semipresenciales de la UASD semestre 2025-10. Encuentra cursos híbridos, horarios y profesores.',
+    keywords: 'uasd semipresencial, programacion docente uasd hibrida, asignaturas semipresenciales uasd',
+  },
+  '/': {
+    title: 'MiSemestre - Programacion Docente UASD 2025-10 | Horarios y Asignaturas',
+    description: 'Consulta la programacion docente UASD 2025-10. Busca asignaturas, horarios, profesores y NRC por campus.',
+    keywords: 'programacion docente uasd, horarios uasd 2025-10, asignaturas uasd, nrc uasd, profesores uasd',
+  },
+};
+
+// Modalidad determinada por ruta — no por URL param
+// Esto elimina el bug de doble clic completamente
+const ROUTE_MODALITY: Record<string, string> = {
+  '/virtual': 'virtual',
+  '/semipresencial': 'semipresencial',
+};
+
 interface HomePageProps {
   darkMode: boolean;
   currentUser: { id: string; displayName: string; email: string } | null;
@@ -49,6 +73,7 @@ interface HomePageProps {
 
 const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenAuth }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [allSections, setAllSections] = useState<Section[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,8 +81,12 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const searchQuery = searchParams.get('q') || '';
   const selectedCampus = searchParams.get('campus') || '';
-  const selectedModality = searchParams.get('modality') || '';
   const itemsPerPage = 21;
+
+  // Modalidad se lee de la ruta, no del URL param — elimina el bug de doble clic
+  const selectedModality = ROUTE_MODALITY[location.pathname] || '';
+
+  const seoConfig = SEO_CONFIG[location.pathname] || SEO_CONFIG['/'];
 
   useEffect(() => {
     const loadData = async () => {
@@ -79,10 +108,9 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
     const params = new URLSearchParams();
     if (query) params.set('q', query);
     if (campus) params.set('campus', campus);
-    if (selectedModality) params.set('modality', selectedModality);
     params.set('page', '1');
     setSearchParams(params);
-  }, [selectedModality, setSearchParams]);
+  }, [setSearchParams]);
 
   const courseMap = useMemo(() => {
     const map = new Map<string, Course>();
@@ -105,7 +133,6 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
 
       const matchesCampus = !selectedCampus || section.campus === selectedCampus;
 
-      // FIX: usar (section.modalidad || '') para evitar crash si modalidad es null/undefined
       const modalidad = (section.modalidad || '').toLowerCase();
 
       const matchesModality = !selectedModality ||
@@ -154,82 +181,87 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
   return (
     <>
       <SEO
-        title="MiSemestre - Programacion Docente UASD 2025-10 | Horarios y Asignaturas"
-        description="Consulta la programacion docente UASD 2025-10. Busca asignaturas, horarios, profesores y NRC por campus. Modalidades presencial, virtual y semipresencial disponibles."
-        keywords="programacion docente uasd, horarios uasd 2025-10, asignaturas uasd, nrc uasd, profesores uasd, universidad autonoma santo domingo, inscripciones uasd, calendario academico"
+        title={seoConfig.title}
+        description={seoConfig.description}
+        keywords={seoConfig.keywords}
       />
       <div className="flex flex-col items-center">
-      <div className="w-full max-w-4xl text-center mb-8">
-        <div className="inline-block">
-          <GraduationCap
-            size={64}
-            className={`${darkMode ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`}
-          />
+        <div className="w-full max-w-4xl text-center mb-8">
+          <div className="inline-block">
+            <GraduationCap
+              size={64}
+              className={`${darkMode ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`}
+            />
+          </div>
+          <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${
+            darkMode ? 'text-white' : 'text-gray-900'
+          }`}>
+            Programacion Docente UASD
+          </h1>
+          <p className={`text-lg ${
+            darkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>
+            Encuentra y explora las asignaturas disponibles para el semestre 2025-10
+            {selectedModality && (
+              <span className="ml-2 capitalize font-medium text-blue-500">
+                · {selectedModality}
+              </span>
+            )}
+          </p>
         </div>
-        <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${
-          darkMode ? 'text-white' : 'text-gray-900'
-        }`}>
-          Programacion Docente UASD
-        </h1>
-        <p className={`text-lg ${
-          darkMode ? 'text-gray-300' : 'text-gray-600'
-        }`}>
-          Encuentra y explora las asignaturas disponibles para el semestre 2025-10
-        </p>
-      </div>
 
-      <SearchBar
-        onSearch={handleSearch}
-        campuses={ALL_CAMPUSES}
-        selectedCampus={selectedCampus}
-        darkMode={darkMode}
-      />
+        <SearchBar
+          onSearch={handleSearch}
+          campuses={ALL_CAMPUSES}
+          selectedCampus={selectedCampus}
+          darkMode={darkMode}
+        />
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-8">
-          {[...Array(21)].map((_, index) => (
-            <SkeletonCard key={index} darkMode={darkMode} />
-          ))}
-        </div>
-      ) : currentSections.length > 0 ? (
-        <>
-          <CourseTable
-            courses={currentCourses}
-            sections={currentSections}
-            onRateSection={() => {
-              if (!currentUser) {
-                onOpenAuth();
-              }
-            }}
-            darkMode={darkMode}
-            currentUser={currentUser}
-          />
-          <Pagination
-            itemsPerPage={itemsPerPage}
-            totalItems={filteredSections.length}
-            paginate={handlePageChange}
-            currentPage={currentPage}
-            darkMode={darkMode}
-          />
-          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-4`}>
-            Mostrando {currentSections.length} de {filteredSections.length} resultados
-            {selectedCampus && ` en ${selectedCampus}`}
-            {selectedModality && ` (${selectedModality})`}
-          </p>
-        </>
-      ) : (
-        <div className={`mt-12 text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-          <GraduationCap className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p className="text-xl font-medium mb-2">
-            {selectedCampus
-              ? `No se encontraron asignaturas para el campus de ${selectedCampus}.`
-              : "No se encontraron asignaturas que coincidan con la busqueda."}
-          </p>
-          <p className="text-sm">
-            Intenta ajustar los filtros o realizar una nueva busqueda
-          </p>
-        </div>
-      )}
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-8">
+            {[...Array(21)].map((_, index) => (
+              <SkeletonCard key={index} darkMode={darkMode} />
+            ))}
+          </div>
+        ) : currentSections.length > 0 ? (
+          <>
+            <CourseTable
+              courses={currentCourses}
+              sections={currentSections}
+              onRateSection={() => {
+                if (!currentUser) {
+                  onOpenAuth();
+                }
+              }}
+              darkMode={darkMode}
+              currentUser={currentUser}
+            />
+            <Pagination
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredSections.length}
+              paginate={handlePageChange}
+              currentPage={currentPage}
+              darkMode={darkMode}
+            />
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-4`}>
+              Mostrando {currentSections.length} de {filteredSections.length} resultados
+              {selectedCampus && ` en ${selectedCampus}`}
+              {selectedModality && ` (${selectedModality})`}
+            </p>
+          </>
+        ) : (
+          <div className={`mt-12 text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            <GraduationCap className="w-16 h-16 mx-auto mb-4 opacity-50" />
+            <p className="text-xl font-medium mb-2">
+              {selectedCampus
+                ? `No se encontraron asignaturas para el campus de ${selectedCampus}.`
+                : "No se encontraron asignaturas que coincidan con la busqueda."}
+            </p>
+            <p className="text-sm">
+              Intenta ajustar los filtros o realizar una nueva busqueda
+            </p>
+          </div>
+        )}
       </div>
     </>
   );

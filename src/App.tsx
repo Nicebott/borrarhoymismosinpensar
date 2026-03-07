@@ -15,8 +15,6 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const ForumPage = lazy(() => import('./pages/ForumPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
-const VirtualPage = lazy(() => import('./pages/VirtualPage'));
-const SemipresencialPage = lazy(() => import('./pages/SemipresencialPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -110,10 +108,12 @@ function App() {
                   />
                 }
               />
+              {/* Virtual y Semipresencial usan HomePage directamente.
+                  La modalidad se detecta automáticamente por la ruta. */}
               <Route
                 path="/virtual"
                 element={
-                  <VirtualPage
+                  <HomePage
                     darkMode={darkMode}
                     currentUser={currentUser}
                     onOpenAuth={handleOpenAuth}
@@ -123,7 +123,7 @@ function App() {
               <Route
                 path="/semipresencial"
                 element={
-                  <SemipresencialPage
+                  <HomePage
                     darkMode={darkMode}
                     currentUser={currentUser}
                     onOpenAuth={handleOpenAuth}
@@ -179,22 +179,13 @@ function App() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-4 justify-center md:justify-end">
-                <FooterLink
-                  to="/terms"
-                  darkMode={darkMode}
-                >
+                <FooterLink to="/terms" darkMode={darkMode}>
                   Terminos y Condiciones
                 </FooterLink>
-                <FooterLink
-                  to="/privacy"
-                  darkMode={darkMode}
-                >
+                <FooterLink to="/privacy" darkMode={darkMode}>
                   Politica de Privacidad
                 </FooterLink>
-                <FooterLink
-                  to="/community-rules"
-                  darkMode={darkMode}
-                >
+                <FooterLink to="/community-rules" darkMode={darkMode}>
                   Normas de Comunidad
                 </FooterLink>
               </div>
