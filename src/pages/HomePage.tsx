@@ -42,19 +42,19 @@ const ALL_CAMPUSES = [
 
 const SEO_CONFIG: Record<string, { title: string; description: string; keywords: string }> = {
   '/virtual': {
-    title: 'UASD Virtual - Programacion Docente Online 2025-10 | MiSemestre',
-    description: 'Consulta las asignaturas virtuales de la UASD semestre 2025-10. Encuentra cursos online, horarios y profesores de la modalidad virtual.',
+    title: 'UASD Virtual - Programacion Docente Online 2026-10 | MiSemestre',
+    description: 'Consulta las asignaturas virtuales de la UASD semestre 2026-10. Encuentra cursos online, horarios y profesores de la modalidad virtual.',
     keywords: 'uasd virtual, programacion docente uasd online, asignaturas virtuales uasd, cursos online uasd, educacion a distancia uasd',
   },
   '/semipresencial': {
-    title: 'UASD Semipresencial - Programacion Docente 2025-10 | MiSemestre',
-    description: 'Consulta las asignaturas semipresenciales de la UASD semestre 2025-10. Encuentra cursos híbridos, horarios y profesores.',
+    title: 'UASD Semipresencial - Programacion Docente 2026-10 | MiSemestre',
+    description: 'Consulta las asignaturas semipresenciales de la UASD semestre 2026-10. Encuentra cursos híbridos, horarios y profesores.',
     keywords: 'uasd semipresencial, programacion docente uasd hibrida, asignaturas semipresenciales uasd',
   },
   '/': {
-    title: 'MiSemestre - Programacion Docente UASD 2025-10 | Horarios y Asignaturas',
-    description: 'Consulta la programacion docente UASD 2025-10. Busca asignaturas, horarios, profesores y NRC por campus.',
-    keywords: 'programacion docente uasd, horarios uasd 2025-10, asignaturas uasd, nrc uasd, profesores uasd',
+    title: 'MiSemestre - Programacion Docente UASD 2026-10 | Horarios y Asignaturas',
+    description: 'Consulta la programacion docente UASD 2026-10. Busca asignaturas, horarios, profesores y NRC por campus.',
+    keywords: 'programacion docente uasd, horarios uasd 2026-10, asignaturas uasd, nrc uasd, profesores uasd',
   },
 };
 
@@ -201,7 +201,12 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
           <p className={`text-lg ${
             darkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            Encuentra y explora las asignaturas disponibles para el semestre 2025-10
+            Encuentra y explora las asignaturas disponibles para el semestre 2026-10
+            {selectedModality && (
+              <span className="ml-2 capitalize font-medium text-blue-500">
+                · {selectedModality}
+              </span>
+            )}
           </p>
         </div>
 

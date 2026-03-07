@@ -10,8 +10,8 @@ interface SEOProps {
 }
 
 const SEO: React.FC<SEOProps> = ({
-  title = 'MiSemestre - Programacion Docente UASD 2025-10',
-  description = 'Programacion docente UASD 2025-10. Encuentra horarios, profesores, asignaturas y resenas de la Universidad Autonoma de Santo Domingo.',
+  title = 'MiSemestre - Programacion Docente UASD 2026-10',
+  description = 'Programacion docente UASD 2026-10. Encuentra horarios, profesores, asignaturas y resenas de la Universidad Autonoma de Santo Domingo.',
   keywords = 'programacion docente uasd, uasd, MiSemestre, universidad uasd, horarios uasd',
   ogImage = 'https://misemestre.com/og-image.jpg',
   canonical
