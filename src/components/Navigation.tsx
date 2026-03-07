@@ -103,7 +103,6 @@ const Navigation: React.FC<NavigationProps> = ({
               <span className="hidden sm:inline">Iniciar Sesion</span>
             </button>
           ) : (
-            /* El div usa static en móvil para que el dropdown use fixed relativo al viewport */
             <div className="static sm:relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
@@ -140,7 +139,11 @@ const Navigation: React.FC<NavigationProps> = ({
           </button>
 
           {/* Mobile menu button */}
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-1.5">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-1.5"
+            aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          >
             {isMenuOpen ? (
               <X size={20} className={darkMode ? 'text-white' : ''} />
             ) : (
