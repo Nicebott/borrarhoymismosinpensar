@@ -202,11 +202,6 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
             darkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
             Encuentra y explora las asignaturas disponibles para el semestre 2025-10
-            {selectedModality && (
-              <span className="ml-2 capitalize font-medium text-blue-500">
-                · {selectedModality}
-              </span>
-            )}
           </p>
         </div>
 
