@@ -40,7 +40,6 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
   useEffect(() => {
     if (user?.id && session) {
       const fetchProfileAndCheckAdmin = async () => {
-        // Batch both queries in parallel
         const [profileResult, isAdminUser, isSuperAdminUser] = await Promise.all([
           supabase
             .from('profiles')
@@ -99,6 +98,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
         onClick={() => setIsChatOpen(!isChatOpen)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        aria-label={isChatOpen ? 'Cerrar chat' : 'Abrir chat'}
         className="fixed bottom-4 right-4 w-12 h-12 md:w-13 md:h-13 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg z-50 flex items-center justify-center transition-colors"
       >
         <MessageCircle className="w-5 h-5 md:w-5 md:h-5 text-white" />
@@ -137,6 +137,7 @@ const Chat: React.FC<ChatProps> = ({ darkMode = false, onOpenAuth }) => {
                 onClick={() => setIsChatOpen(false)}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
+                aria-label="Cerrar chat"
                 className={`p-2 rounded-lg transition-colors ${
                   darkMode ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
