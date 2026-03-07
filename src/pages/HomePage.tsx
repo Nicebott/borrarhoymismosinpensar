@@ -105,9 +105,15 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
 
       const matchesCampus = !selectedCampus || section.campus === selectedCampus;
 
-      const modalidad = section.modalidad.toLowerCase();
+      // FIX: usar (section.modalidad || '') para evitar crash si modalidad es null/undefined
+      const modalidad = (section.modalidad || '').toLowerCase();
+
       const matchesModality = !selectedModality ||
-        (selectedModality === 'virtual' && modalidad.includes('online')) ||
+        (selectedModality === 'virtual' && (
+          modalidad.includes('online') ||
+          modalidad.includes('virtual') ||
+          modalidad.includes('internet')
+        )) ||
         (selectedModality === 'semipresencial' && (
           modalidad.includes('semi') ||
           modalidad.includes('semipresencial') ||
