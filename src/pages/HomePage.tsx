@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import CourseTable from '../components/CourseTable';
 import Pagination from '../components/Pagination';
 import LoadingSpinner from '../components/LoadingSpinner';
-import SkeletonCard from '../components/SkeletonCard';
 import SEO from '../components/SEO';
 import { Course, Section } from '../types';
 import { fetchCourseData } from '../api/courseData';
 import { normalizeText } from '../utils/stringUtils';
 import { GraduationCap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const ALL_CAMPUSES = [
   'Santo Domingo',
@@ -47,7 +47,7 @@ interface HomePageProps {
   onOpenAuth: () => void;
 }
 
-const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenAuth }) => {
+const HomePage: React.FC<HomePageProps> = ({ darkMode, currentUser, onOpenAuth }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [allSections, setAllSections] = useState<Section[]>([]);
@@ -84,17 +84,11 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
     setSearchParams(params);
   }, [selectedModality, setSearchParams]);
 
-  const courseMap = useMemo(() => {
-    const map = new Map<string, Course>();
-    allCourses.forEach(course => map.set(course.id, course));
-    return map;
-  }, [allCourses]);
-
   const filteredSections = useMemo(() => {
     const normalizedQuery = normalizeText(searchQuery);
 
     return allSections.filter(section => {
-      const course = courseMap.get(section.courseId);
+      const course = allCourses.find(c => c.id === section.courseId);
 
       const matchesSearch = !normalizedQuery || [
         normalizeText(section.professor),
@@ -116,7 +110,7 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
 
       return matchesSearch && matchesCampus && matchesModality;
     });
-  }, [allSections, courseMap, searchQuery, selectedCampus, selectedModality]);
+  }, [allSections, allCourses, searchQuery, selectedCampus, selectedModality]);
 
   const totalPages = Math.max(1, Math.ceil(filteredSections.length / itemsPerPage));
 
@@ -152,14 +146,23 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
         description="Consulta la programacion docente UASD 2025-10. Busca asignaturas, horarios, profesores y NRC por campus. Modalidades presencial, virtual y semipresencial disponibles."
         keywords="programacion docente uasd, horarios uasd 2025-10, asignaturas uasd, nrc uasd, profesores uasd, universidad autonoma santo domingo, inscripciones uasd, calendario academico"
       />
-      <div className="flex flex-col items-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="flex flex-col items-center"
+      >
       <div className="w-full max-w-4xl text-center mb-8">
-        <div className="inline-block">
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          className="inline-block"
+        >
           <GraduationCap
             size={64}
             className={`${darkMode ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`}
           />
-        </div>
+        </motion.div>
         <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${
           darkMode ? 'text-white' : 'text-gray-900'
         }`}>
@@ -180,11 +183,7 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
       />
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-8">
-          {[...Array(21)].map((_, index) => (
-            <SkeletonCard key={index} darkMode={darkMode} />
-          ))}
-        </div>
+        <LoadingSpinner darkMode={darkMode} message="Cargando asignaturas..." />
       ) : currentSections.length > 0 ? (
         <>
           <CourseTable
@@ -212,7 +211,11 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
           </p>
         </>
       ) : (
-        <div className={`mt-12 text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={`mt-12 text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}
+        >
           <GraduationCap className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p className="text-xl font-medium mb-2">
             {selectedCampus
@@ -222,13 +225,11 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
           <p className="text-sm">
             Intenta ajustar los filtros o realizar una nueva busqueda
           </p>
-        </div>
+        </motion.div>
       )}
-      </div>
+      </motion.div>
     </>
   );
-});
-
-HomePage.displayName = 'HomePage';
+};
 
 export default HomePage;

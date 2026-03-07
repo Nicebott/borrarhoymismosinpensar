@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, MapPin, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from './ui/Button';
@@ -28,26 +28,26 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
     setCampus(selectedCampus);
   }, [selectedCampus]);
 
-  const saveSearch = useCallback((searchQuery: string) => {
+  const saveSearch = (searchQuery: string) => {
     if (!searchQuery.trim()) return;
-
+    
     const updated = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 5);
     setRecentSearches(updated);
     localStorage.setItem('recentSearches', JSON.stringify(updated));
-  }, [recentSearches]);
+  };
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     saveSearch(query);
     onSearch(query, campus);
     setShowRecentSearches(false);
-  }, [query, campus, onSearch]);
+  };
 
-  const handleRecentSearchClick = useCallback((searchQuery: string) => {
+  const handleRecentSearchClick = (searchQuery: string) => {
     setQuery(searchQuery);
     onSearch(searchQuery, campus);
     setShowRecentSearches(false);
-  }, [campus, onSearch]);
+  };
 
   const clearRecentSearches = () => {
     setRecentSearches([]);

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, memo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
@@ -9,7 +9,7 @@ interface PaginationProps {
   darkMode: boolean;
 }
 
-const Pagination: React.FC<PaginationProps> = memo(({
+const Pagination: React.FC<PaginationProps> = ({
   itemsPerPage,
   totalItems,
   paginate,
@@ -20,20 +20,12 @@ const Pagination: React.FC<PaginationProps> = memo(({
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
     const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setIsMobile(window.innerWidth < 640);
-      }, 150);
+      setIsMobile(window.innerWidth < 640);
     };
 
-    window.addEventListener('resize', handleResize, { passive: true });
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', handleResize);
-    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const pageNumbers = useMemo(() => {
@@ -132,8 +124,6 @@ const Pagination: React.FC<PaginationProps> = memo(({
       </button>
     </nav>
   );
-});
-
-Pagination.displayName = 'Pagination';
+};
 
 export default Pagination;

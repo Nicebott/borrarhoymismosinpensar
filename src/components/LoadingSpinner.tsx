@@ -8,7 +8,7 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ darkMode, message = 'Cargando...' }) => {
   return (
-    <div className="flex flex-col items-center justify-center w-full py-12 min-h-[400px]">
+    <div className="flex flex-col items-center justify-center w-full py-12">
       <Loader2
         className={`w-12 h-12 animate-spin ${
           darkMode ? 'text-blue-400' : 'text-blue-600'
