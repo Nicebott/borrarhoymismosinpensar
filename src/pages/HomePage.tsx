@@ -42,19 +42,19 @@ const ALL_CAMPUSES = [
 
 const SEO_CONFIG: Record<string, { title: string; description: string; keywords: string }> = {
   '/virtual': {
-    title: 'UASD Virtual - Programacion Docente Online 2026-10 | MiSemestre',
-    description: 'Consulta las asignaturas virtuales de la UASD semestre 2026-10. Encuentra cursos online, horarios y profesores de la modalidad virtual.',
+    title: 'UASD Virtual - Programacion Docente Online 2025-10 | MiSemestre',
+    description: 'Consulta las asignaturas virtuales de la UASD semestre 2025-10. Encuentra cursos online, horarios y profesores de la modalidad virtual.',
     keywords: 'uasd virtual, programacion docente uasd online, asignaturas virtuales uasd, cursos online uasd, educacion a distancia uasd',
   },
   '/semipresencial': {
-    title: 'UASD Semipresencial - Programacion Docente 2026-10 | MiSemestre',
-    description: 'Consulta las asignaturas semipresenciales de la UASD semestre 2026-10. Encuentra cursos híbridos, horarios y profesores.',
+    title: 'UASD Semipresencial - Programacion Docente 2025-10 | MiSemestre',
+    description: 'Consulta las asignaturas semipresenciales de la UASD semestre 2025-10. Encuentra cursos híbridos, horarios y profesores.',
     keywords: 'uasd semipresencial, programacion docente uasd hibrida, asignaturas semipresenciales uasd',
   },
   '/': {
-    title: 'MiSemestre - Programacion Docente UASD 2026-10 | Horarios y Asignaturas',
-    description: 'Consulta la programacion docente UASD 2026-10. Busca asignaturas, horarios, profesores y NRC por campus.',
-    keywords: 'programacion docente uasd, horarios uasd 2026-10, asignaturas uasd, nrc uasd, profesores uasd',
+    title: 'MiSemestre - Programacion Docente UASD 2025-10 | Horarios y Asignaturas',
+    description: 'Consulta la programacion docente UASD 2025-10. Busca asignaturas, horarios, profesores y NRC por campus.',
+    keywords: 'programacion docente uasd, horarios uasd 2025-10, asignaturas uasd, nrc uasd, profesores uasd',
   },
 };
 
@@ -124,12 +124,42 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
     return allSections.filter(section => {
       const course = courseMap.get(section.courseId);
 
-      const matchesSearch = !normalizedQuery || [
-        normalizeText(section.professor),
-        normalizeText(section.nrc),
-        course && normalizeText(course.name),
-        course && normalizeText(course.code)
-      ].some(text => text && text.includes(normalizedQuery));
+      // Si no hay búsqueda, solo aplicar filtros de campus y modalidad
+      if (!normalizedQuery) {
+        const matchesCampus = !selectedCampus || section.campus === selectedCampus;
+        const modalidad = (section.modalidad || '').toLowerCase();
+        const matchesModality = !selectedModality ||
+          (selectedModality === 'virtual' && (
+            modalidad.includes('online') ||
+            modalidad.includes('virtual') ||
+            modalidad.includes('internet')
+          )) ||
+          (selectedModality === 'semipresencial' && (
+            modalidad.includes('semi') ||
+            modalidad.includes('semipresencial') ||
+            modalidad.includes('semi presencial')
+          ));
+        return matchesCampus && matchesModality;
+      }
+
+      // Normalizar todos los campos de búsqueda
+      const professorNormalized = normalizeText(section.professor);
+      const nrcNormalized = normalizeText(section.nrc);
+      const courseNameNormalized = course ? normalizeText(course.name) : '';
+      const courseCodeNormalized = course ? normalizeText(course.code) : '';
+
+      // Dividir la consulta en palabras para búsqueda flexible
+      const queryWords = normalizedQuery.split(' ').filter(word => word.length > 0);
+
+      // Verificar si todas las palabras de la consulta están en alguno de los campos
+      const matchesSearch = queryWords.every(queryWord => {
+        return [
+          professorNormalized,
+          nrcNormalized,
+          courseNameNormalized,
+          courseCodeNormalized
+        ].some(text => text && text.includes(queryWord));
+      });
 
       const matchesCampus = !selectedCampus || section.campus === selectedCampus;
 
@@ -201,7 +231,7 @@ const HomePage: React.FC<HomePageProps> = memo(({ darkMode, currentUser, onOpenA
           <p className={`text-lg ${
             darkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            Encuentra y explora las asignaturas disponibles para el semestre 2026-10
+            Encuentra y explora las asignaturas disponibles para el semestre 2025-10
           </p>
         </div>
 
