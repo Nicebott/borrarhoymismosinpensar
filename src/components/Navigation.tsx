@@ -106,6 +106,7 @@ const Navigation: React.FC<NavigationProps> = ({
             <div className="static sm:relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                aria-label="Menú de perfil"
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm ${
                   darkMode
                     ? 'bg-gray-700 text-white hover:bg-gray-600'
