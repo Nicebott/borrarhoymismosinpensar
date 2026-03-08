@@ -233,4 +233,4 @@ const FooterLink: React.FC<FooterLinkProps> = ({ to, darkMode, children }) => (
   </Link>
 );
 
-export default App;
+export default App; 
