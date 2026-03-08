@@ -41,7 +41,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
     saveSearch(query);
     onSearch(query, campus);
     setShowRecentSearches(false);
-  }, [query, campus, onSearch]);
+  }, [query, campus, onSearch, saveSearch]);
 
   const handleRecentSearchClick = useCallback((searchQuery: string) => {
     setQuery(searchQuery);
@@ -72,6 +72,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setShowRecentSearches(true)}
+              aria-label="Buscar por materia, profesor o NRC"
               className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
                 darkMode
                   ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
@@ -82,6 +83,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
               <button
                 type="button"
                 onClick={() => setQuery('')}
+                aria-label="Limpiar búsqueda"
                 className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                   darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
                 }`}
@@ -89,7 +91,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
                 <X size={16} />
               </button>
             )}
-            
+
             <AnimatePresence>
               {showRecentSearches && recentSearches.length > 0 && (
                 <motion.div
@@ -130,7 +132,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
               )}
             </AnimatePresence>
           </div>
-          
+
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <MapPin className={`h-5 w-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
@@ -141,6 +143,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
                 setCampus(e.target.value);
                 onSearch(query, e.target.value);
               }}
+              aria-label="Seleccionar campus"
               className={`w-full md:w-48 pl-10 pr-4 py-3 rounded-lg border appearance-none ${
                 darkMode
                   ? 'bg-gray-800 border-gray-700 text-white'
@@ -155,7 +158,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
               ))}
             </select>
           </div>
-          
+
           <Button type="submit" variant="primary" className="md:w-auto">
             <Search className="h-5 w-5 mr-2" />
             Buscar
@@ -175,6 +178,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, campuses, selectedCampu
                   setCampus('');
                   onSearch(query, '');
                 }}
+                aria-label="Quitar filtro de campus"
                 className="ml-2 hover:text-blue-700"
               >
                 <X size={14} />
